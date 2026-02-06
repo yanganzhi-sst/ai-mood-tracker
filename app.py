@@ -1,41 +1,64 @@
-# this is for testing
 import streamlit as st
-import pandas as pd
+import requests
+import os
 
-# Title
-st.title("🍎 Interactive Fruit Explorer")
-st.write("Explore your favorite fruits and learn some fun facts!")
+# ---- APP TITLE ----
+st.set_page_config(page_title="AI Mood Journal", page_icon="📝")
+st.title("📝 AI Mood Journal")
+st.write(
+    "Write about your day and I’ll analyze your mood using AI! "
+    "Just type your journal entry below and click 'Analyze Mood'."
+)
 
-# Sample data
-data = {
-    "Fruit": ["Apple", "Banana", "Orange", "Strawberry", "Mango"],
-    "Color": ["Red", "Yellow", "Orange", "Red", "Yellow"],
-    "Calories per 100g": [52, 96, 47, 33, 60]
-}
+# ---- INPUT TEXT AREA ----
+journal_entry = st.text_area(
+    "Write your journal entry here:", 
+    height=200
+)
 
-df = pd.DataFrame(data)
+# ---- GET API KEY ----
+# Option 1: Use environment variable (recommended for deployment)
+api_key = os.getenv("GEMINI_API_KEY")
+# Option 2: Hardcode (ONLY for testing locally)
+# api_key = "YOUR_GEMINI_API_KEY_HERE"
 
-# Sidebar selection
-selected_fruit = st.sidebar.selectbox("Select a fruit", df["Fruit"])
+# ---- BUTTON TO ANALYZE ----
+if st.button("Analyze Mood"):
+    if not journal_entry:
+        st.warning("Please write something first!")
+    elif not api_key:
+        st.error("API key not found! Please set GEMINI_API_KEY in environment variables.")
+    else:
+        st.info("Analyzing your mood... 🤖")
 
-# Display fruit info
-fruit_info = df[df["Fruit"] == selected_fruit]
-st.subheader(f"{selected_fruit} Info")
-st.write(fruit_info)
+        # ---- CUSTOM PROMPT FOR AI ----
+        # You can change this text to control how the AI responds
+        prompt_text = f"""
+        Analyze the mood of the following journal entry.
+        1. Output only one word for mood: Positive, Neutral, or Negative.
+        2. Then provide a short friendly explanation (1-2 sentences).
+        Journal Entry: \"\"\"{journal_entry}\"\"\"
+        """
 
-# Fun fact
-fun_facts = {
-    "Apple": "Apples float in water because they are 25% air!",
-    "Banana": "Bananas are berries, but strawberries are not!",
-    "Orange": "Oranges are actually modified berries called hesperidium.",
-    "Strawberry": "Strawberries have seeds on the outside.",
-    "Mango": "Mangoes are known as the 'king of fruits'."
-}
+        # ---- API REQUEST TO GEMINI ----
+        url = "https://gemini.googleapis.com/v1/models/text-bison-001:generate"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        payload = {
+            "prompt": prompt_text,
+            "max_output_tokens": 150
+        }
 
-st.info(fun_facts[selected_fruit])
-
-# Input from user
-st.subheader("Your Fruit Opinion")
-user_input = st.text_input("What do you think about this fruit?")
-if user_input:
-    st.write("You said:", user_input)
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            if response.status_code == 200:
+                result = response.json()
+                mood_text = result["candidates"][0]["content"]
+                st.subheader("Your Mood Analysis:")
+                st.write(mood_text)
+            else:
+                st.error(f"API Error: {response.status_code} {response.text}")
+        except Exception as e:
+            st.error(f"Request failed: {e}")
