@@ -13,11 +13,11 @@ st.write(
 journal_entry = st.text_area("Write your journal entry here:", height=200)
 
 # ---- API KEY (kept in code) ----
-api_key = "AIzaSyD5xvU9HFoT3XpogoAoJ3EGR-v35AEbo_Y"  # <-- your new key here
+api_key = "AIzaSyD5xvU9HFoT3XpogoAoJ3EGR-v35AEbo_Y"  # your key
 genai.configure(api_key=api_key)
 
-# ---- LOAD GEMINI MODEL ----
-model = genai.GenerativeModel("gemini-1.5-flash")
+# ---- LOAD GEMINI MODEL (updated model name) ----
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # ---- SESSION STATE FOR HISTORY ----
 if "entries" not in st.session_state:
@@ -33,7 +33,6 @@ if st.button("Analyze Mood"):
     else:
         st.info("Analyzing your mood... 🤖")
 
-        # ---- PROMPT FOR AI ----
         prompt_text = f"""
         Analyze the mood of the following journal entry.
         Output one word only for mood: Positive, Neutral, or Negative.
@@ -45,14 +44,14 @@ if st.button("Analyze Mood"):
             response = model.generate_content(prompt_text)
             mood_text = response.text.strip()
 
-            # ---- EXTRACT MOOD WORD ----
+            # Extract mood
             mood_word = "Neutral"
-            for word in ["Positive", "Neutral", "Negative"]:
-                if word.lower() in mood_text.lower():
-                    mood_word = word
+            for w in ["Positive", "Neutral", "Negative"]:
+                if w.lower() in mood_text.lower():
+                    mood_word = w
                     break
 
-            # ---- DISPLAY WITH COLOR AND EMOJI ----
+            # Display result
             if mood_word == "Positive":
                 st.success(f"😊 Positive Mood Detected!\n\n{mood_text}")
             elif mood_word == "Neutral":
@@ -60,14 +59,14 @@ if st.button("Analyze Mood"):
             else:
                 st.error(f"😢 Negative Mood Detected\n\n{mood_text}")
 
-            # ---- SAVE TO HISTORY ----
+            # Save to history
             st.session_state.entries.append(journal_entry)
             st.session_state.moods.append(mood_word)
 
         except Exception as e:
             st.error(f"AI request failed: {e}")
 
-# ---- DISPLAY HISTORY ----
+# Display history
 if st.session_state.entries:
     st.subheader("📖 Journal History")
     for i in range(len(st.session_state.entries) - 1, -1, -1):
