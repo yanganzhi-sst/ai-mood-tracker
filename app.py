@@ -1,5 +1,7 @@
 import streamlit as st
 import requests
+pip install google-generativeai
+
 
 # ---- APP TITLE ----
 st.set_page_config(page_title="AI Mood Journal", page_icon="📝")
