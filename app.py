@@ -17,7 +17,7 @@ journal_entry = st.text_area(
 
 # ---- API KEY ----
 # For local testing only:
-api_key = "AIzaSyAgPkCJhD2q_3hjuEZv9FnkqOuHZDbiHBg"
+api_key = "AIzaSyD2JD3o13ocgivKlePflR37kJv3fCMDwQY"
 
 # ---- SESSION STATE FOR HISTORY ----
 if "entries" not in st.session_state:
