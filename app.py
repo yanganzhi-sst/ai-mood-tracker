@@ -61,14 +61,10 @@ if st.button("Analyze Mood"):
                 
                 **IN SINGAPORE, HELP IS AVAILABLE 24/7:**
                 
-                📞 **Samaritans of Singapore (SOS):** 1767 (24 hours)
+                📞 **Samaritans of Singapore (SOS):** 1767
                 💬 **SOS Care Text:** 9151 1767 (WhatsApp)
+                
                 🌐 **Chat Online:** https://www.sos.org.sg/
-                
-                🏥 **IMH Mental Health Helpline:** 6389 2222
-                🧑‍⚕️ **CHAT (Youth):** 6493 6500 / www.chat.mentalhealth.sg
-                
-                ⚕️ **Singapore General Hospital:** 6222 3322
                 👥 **TOUCHline (Counselling):** 6804 6555
                 
                 ---
