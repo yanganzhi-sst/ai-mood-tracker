@@ -31,79 +31,58 @@ if st.button("Analyze Mood"):
     if not journal_entry.strip():
         st.warning("Please write something first!")
     else:
-        # ---- CHECK FOR DANGEROUS CONTENT ----
-        danger_words = [
-            "kill myself", "suicide", "want to die", "end my life", "hurt myself",
-            "hang", "jump off", "overdose", "shoot myself", "cut myself"
-        ]
+        st.info("Analyzing your mood... 🤖")
 
-        if any(word in journal_entry.lower() for word in danger_words):
-            # Show modal popup
-            with st.modal("⚠️ Get Help Immediately!"):
-                st.write(
-                    """
-                    It looks like you’re talking about self-harm or suicide. 
-                    Please get help immediately. Here are some resources in Singapore:
+        # ---- IMPROVED AI PROMPT ----
+        prompt_text = f"""
+        You are a compassionate mental health assistant and mood analyzer. 
+        Read the following journal entry and do three things:
 
-                    - **Samaritans of Singapore**: 1767 
-                    - **IMH Mental Health Helpline**: 6389 2222  
-                    - **Chat online**: https://www.sos.org.sg/
+        1. Determine the overall mood of the person. Output **only one word**: Positive, Neutral, or Negative.
+        2. Provide a **friendly, human-like explanation** (1-2 sentences) describing why you think the person feels this way.
+        3. If the entry contains any thoughts of self-harm, suicide, or extreme distress (e.g., wanting to hang, jump off, overdose, hurt themselves), output only the following warning text:
+           "⚠️ This journal entry may indicate self-harm or suicidal thoughts. Please seek help immediately."
 
-                    You can also reach out to a trusted adult or friend. You’re not alone. 💛
-                    """
-                )
-                st.button("Close")
-        else:
-            st.info("Analyzing your mood... 🤖")
+        Journal Entry:
+        \"\"\"{journal_entry}\"\"\"
 
-            # ---- IMPROVED AI PROMPT ----
-            prompt_text = f"""
-            You are a compassionate mental health assistant and mood analyzer. 
-            Read the following journal entry and do three things:
+        Remember:
+        - Output exactly one mood word first, then a short explanation, unless the warning applies.
+        - Be empathetic and supportive in tone.
+        - Do not add unrelated commentary.
+        """
 
-            1. Determine the overall mood of the person. Output **only one word**: Positive, Neutral, or Negative.
-            2. Provide a **friendly, human-like explanation** (1-2 sentences) describing why you think the person feels this way.
-            3. If the entry contains any thoughts of self-harm, suicide, or extreme distress (e.g., wanting to hang, jump off, overdose, hurt themselves), output only the following warning text:
-               "⚠️ This journal entry may indicate self-harm or suicidal thoughts. Please seek help immediately."
+        try:
+            response = model.generate_content(prompt_text)
+            mood_text = response.text.strip()
 
-            Journal Entry:
-            \"\"\"{journal_entry}\"\"\"
+            # ---- CHECK FOR SELF-HARM WARNING ----
+            warning_detected = "⚠️" in mood_text
 
-            Remember:
-            - Output exactly one mood word first, then a short explanation, unless the warning applies.
-            - Be empathetic and supportive in tone.
-            - Do not add unrelated commentary.
-            """
+            # ---- EXTRACT MOOD WORD ----
+            mood_word = "Neutral"
+            for word in ["Positive", "Neutral", "Negative"]:
+                if word.lower() in mood_text.lower():
+                    mood_word = word
+                    break
 
-            try:
-                response = model.generate_content(prompt_text)
-                mood_text = response.text.strip()
-
-                # ---- DETECT IF AI GAVE A WARNING ----
-                if "⚠️" in mood_text:
-                    st.error(mood_text)
+            # ---- DISPLAY MOOD ----
+            if not warning_detected:
+                if mood_word == "Positive":
+                    st.success(f"😊 Positive Mood Detected!\n\n{mood_text}")
+                elif mood_word == "Neutral":
+                    st.info(f"😐 Neutral Mood Detected\n\n{mood_text}")
                 else:
-                    # ---- EXTRACT MOOD WORD ----
-                    mood_word = "Neutral"
-                    for word in ["Positive", "Neutral", "Negative"]:
-                        if word.lower() in mood_text.lower():
-                            mood_word = word
-                            break
+                    st.error(f"😢 Negative Mood Detected\n\n{mood_text}")
+            else:
+                st.error(mood_text)
 
-                    # ---- DISPLAY WITH COLOR AND EMOJI ----
-                    if mood_word == "Positive":
-                        st.success(f"😊 Positive Mood Detected!\n\n{mood_text}")
-                    elif mood_word == "Neutral":
-                        st.info(f"😐 Neutral Mood Detected\n\n{mood_text}")
-                    else:
-                        st.error(f"😢 Negative Mood Detected\n\n{mood_text}")
+            # ---- SAVE TO HISTORY ----
+            st.session_state.entries.append(journal_entry)
+            st.session_state.moods.append(mood_word)
 
-                    # ---- SAVE TO HISTORY ----
-                    st.session_state.entries.append(journal_entry)
-                    st.session_state.moods.append(mood_word)
-
-            except Exception as e:
-                st.error(f"AI request failed: {e}")
+        except Exception as e:
+            st.error(f"AI request failed: {e}")
 
 # ---- DISPLAY HISTORY ----
 if st.session_state.entries:
