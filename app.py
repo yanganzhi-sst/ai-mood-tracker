@@ -224,62 +224,62 @@ def display_emotion_result(emotion: str, explanation: str):
     else:
         st.info(f"{emoji} **{emotion}**\n\n{explanation}")
 
-# ---------- SIDEBAR - CLEAN MAC-FRIENDLY NAVIGATION ----------
+# ---------- SIDEBAR - BLACK MAC-FRIENDLY NAVIGATION ----------
 st.sidebar.markdown("""
 <style>
-    /* Clean, minimal styling for Mac */
+    /* Clean, black styling for Mac */
     [data-testid="stSidebar"] {
-        background-color: #fafafc;
+        background-color: #000000 !important;
         padding: 20px 0px;
     }
     
-    /* App title */
+    /* App title - white on black */
     .sidebar-title {
         font-size: 28px;
         font-weight: 600;
-        color: #1a1e24;
+        color: #ffffff;
         margin-bottom: 8px;
         letter-spacing: -0.5px;
         padding-left: 20px;
     }
     
-    /* BIG DATE STYLING */
+    /* BIG DATE STYLING - black card */
     .big-date {
-        background: white;
+        background: #1a1a1a;
         padding: 20px 20px;
         border-radius: 16px;
         margin: 16px 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-        border: 1px solid #f0f0f0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        border: 1px solid #333333;
     }
     .day-name {
         font-size: 18px;
         font-weight: 500;
-        color: #5e6772;
+        color: #b0b0b0;
         margin-bottom: 4px;
         letter-spacing: -0.2px;
     }
     .day-date {
         font-size: 32px;
         font-weight: 700;
-        color: #1a1e24;
+        color: #ffffff;
         line-height: 1.2;
         letter-spacing: -1px;
     }
     .month-year {
         font-size: 18px;
         font-weight: 500;
-        color: #5e6772;
+        color: #b0b0b0;
         margin-top: 4px;
     }
     
-    /* Clean nav buttons - no borders, no backgrounds */
+    /* Clean nav buttons - black theme */
     .nav-item {
         padding: 10px 20px;
         margin: 2px 0px;
         border-radius: 0px;
         font-weight: 500;
-        color: #3a4048;
+        color: #e0e0e0;
         transition: all 0.1s;
         display: flex;
         align-items: center;
@@ -287,14 +287,14 @@ st.sidebar.markdown("""
         border-left: 3px solid transparent;
     }
     .nav-item:hover {
-        background-color: #e8eaed;
-        border-left: 3px solid #8e98a3;
-        color: #1a1e24;
+        background-color: #2a2a2a;
+        border-left: 3px solid #808080;
+        color: #ffffff;
     }
     .nav-item-active {
-        background-color: #e1f0fa;
-        border-left: 3px solid #1a73e8 !important;
-        color: #1a73e8;
+        background-color: #1a33a8 !important;
+        border-left: 3px solid #4d94ff !important;
+        color: #ffffff !important;
         font-weight: 600;
     }
     .nav-icon {
@@ -303,29 +303,39 @@ st.sidebar.markdown("""
         text-align: center;
     }
     
-    /* Stats card */
+    /* Stats card - black theme */
     .stats-card {
-        background: white;
+        background: #1a1a1a;
         padding: 16px 20px;
         border-radius: 12px;
         margin: 8px 20px;
-        border: 1px solid #f0f0f0;
+        border: 1px solid #333333;
     }
     .stats-label {
         font-size: 14px;
-        color: #5e6772;
+        color: #b0b0b0;
         margin-bottom: 4px;
     }
     .stats-number {
         font-size: 28px;
         font-weight: 700;
-        color: #1a1e24;
+        color: #ffffff;
     }
     
-    /* Divider */
+    /* Divider - dark grey */
     .sidebar-divider {
         margin: 16px 20px;
-        border-top: 1px solid #e8eaed;
+        border-top: 1px solid #333333;
+    }
+    
+    /* Expander in sidebar - black theme */
+    .streamlit-expanderHeader {
+        color: #e0e0e0 !important;
+        background-color: #1a1a1a !important;
+    }
+    .streamlit-expanderContent {
+        background-color: #1a1a1a !important;
+        color: #e0e0e0 !important;
     }
     
     /* Hide Streamlit branding */
@@ -334,6 +344,7 @@ st.sidebar.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+        
 # App title
 st.sidebar.markdown('<div class="sidebar-title">🌱 MindEase</div>', unsafe_allow_html=True)
 
