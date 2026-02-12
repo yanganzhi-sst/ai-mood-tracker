@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-pip install google-generativeai
 
 
 # ---- APP TITLE ----
