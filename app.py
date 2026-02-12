@@ -13,7 +13,7 @@ st.write(
 journal_entry = st.text_area("Write your journal entry here:", height=200)
 
 # ---- API KEY (kept in code) ----
-api_key = "PASTE_YOUR_NEW_KEY_HERE"  # <-- keep it here
+api_key = "AIzaSyD5xvU9HFoT3XpogoAoJ3EGR-v35AEbo_Y"  # <-- your new key here
 genai.configure(api_key=api_key)
 
 # ---- LOAD GEMINI MODEL ----
