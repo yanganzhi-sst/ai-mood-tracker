@@ -41,8 +41,7 @@ if st.button("Analyze Mood"):
                 ⚠️ It looks like you’re talking about self-harm or suicide. 
                 Please get help immediately. Here are some resources in Singapore:
 
-                - **Samaritans of Singapore (SOS)**: 1800 221 4444  
-                - **IMH Mental Health Helpline**: 6389 2222  
+                - **Samaritans of Singapore**: 1767
                 - **Chat online**: https://www.sos.org.sg/
 
                 You can also reach out to a trusted adult or friend. You’re not alone. 💛
@@ -53,10 +52,21 @@ if st.button("Analyze Mood"):
 
             # ---- PROMPT FOR AI ----
             prompt_text = f"""
-            Analyze the mood of the following journal entry.
-            Output one word only for mood: Positive, Neutral, or Negative.
-            Then give a short friendly explanation (1-2 sentences).
-            Journal Entry: \"\"\"{journal_entry}\"\"\"
+            You are a compassionate mental health assistant and mood analyzer. 
+            Read the following journal entry and do three things:
+    
+            1. Determine the overall mood of the person. Output **only one word**: Positive, Neutral, or Negative.
+            2. Provide a **friendly, human-like explanation** (1-2 sentences) describing why you think the person feels this way.
+            3. If the entry contains any thoughts of self-harm, suicide, or extreme distress (e.g., wanting to hang, jump off, overdose, hurt themselves), output only the following warning text:
+               "⚠️ This journal entry may indicate self-harm or suicidal thoughts. Please seek help immediately."
+    
+            Journal Entry:
+            \"\"\"{journal_entry}\"\"\"
+    
+            Remember:
+            - Output exactly one mood word first, then a short explanation, unless the warning applies.
+            - Be empathetic and supportive in tone.
+            - Do not add unrelated commentary.
             """
 
             try:
