@@ -792,4 +792,56 @@ elif page == "🧰 Self-Care":
         
         prompts = [
             "What's one thing I can control today?",
-            "What small moment
+            "What small moment brought me peace recently?",
+            "If my best friend felt this way, what would I tell them?",
+            "What's one thing I did well today, even if small?",
+            "What do I need right now, in this moment?",
+            "What's something I'm looking forward to?"
+        ]
+        
+        for prompt in prompts:
+            st.markdown(f"- {prompt}")
+
+# ---------- PAGE 4: CRISIS HELP ----------
+else:  # Crisis Help
+    st.title("🆘 Crisis Support - Singapore")
+    st.caption("24/7 confidential helplines")
+    
+    display_safety_block()
+    
+    st.divider()
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        ### 🧑‍🤝‍🧑 For Youth
+        - **CHAT (youth mental health)**: 6493 6500
+        - **Tinkle Friend**: 1800 274 4788
+        - **eCounselling Centre**: chat.mentalhealth.sg
+        
+        ### 👨‍👩‍👧 For Families
+        - **Care Corner Counselling**: 1800 353 5800
+        - **Fei Yue Family Service**: 6819 9170
+        """)
+    
+    with col2:
+        st.markdown("""
+        ### 🏥 Professional Help
+        - **IMH Appointment**: 6389 2000
+        - **SGH Psychiatry**: 6321 4377
+        - **NUH Psychiatry**: 6772 2000
+        
+        ### 💻 Online Support
+        - **SOS Chat**: sos.org.sg
+        - **Mindline.sg**: mindline.sg
+        - **EC2 (SAMH)**: samhealth.org.sg
+        """)
+    
+    st.divider()
+    st.warning("""
+    **If you or someone else is in immediate danger, please call 995 now.**
+    
+    These helplines are confidential and staffed by trained professionals.
+    You don't need to be in crisis to call - they're here to listen.
+    """)
