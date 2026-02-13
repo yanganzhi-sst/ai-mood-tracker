@@ -344,7 +344,6 @@ st.sidebar.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-        
 # App title
 st.sidebar.markdown('<div class="sidebar-title">🌱 MindEase</div>', unsafe_allow_html=True)
 
@@ -358,10 +357,9 @@ st.sidebar.markdown(f'''
 </div>
 ''', unsafe_allow_html=True)
 
-# Navigation options
+# Navigation options - UPDATED (removed AI Analyzer)
 nav_items = [
     {"icon": "📝", "label": "Journal", "id": "journal"},
-    {"icon": "🤖", "label": "AI Analyzer", "id": "ai"},
     {"icon": "📊", "label": "History", "id": "history"},
     {"icon": "🧰", "label": "Self-Care", "id": "selfcare"},
     {"icon": "🆘", "label": "Crisis Help", "id": "crisis"}
@@ -404,12 +402,12 @@ if not df.empty:
     if not today_entries.empty:
         latest_mood = today_entries.iloc[-1]["mood"]
         emoji = EMOTION_DATA.get(latest_mood, {}).get("emoji", "📝")
-        st.sidebar.markdown(f'<div style="margin-top: 12px; font-size: 16px;">Latest: {emoji} {latest_mood}</div>', unsafe_allow_html=True)
+        st.sidebar.markdown(f'<div style="margin-top: 12px; font-size: 16px; color: white;">Latest: {emoji} {latest_mood}</div>', unsafe_allow_html=True)
     st.sidebar.markdown('</div>', unsafe_allow_html=True)
 else:
     st.sidebar.markdown('<div class="stats-card">', unsafe_allow_html=True)
     st.sidebar.markdown('<div class="stats-label">Welcome!</div>', unsafe_allow_html=True)
-    st.sidebar.markdown('<div style="font-size: 16px; margin-top: 8px;">Start your first entry ✨</div>', unsafe_allow_html=True)
+    st.sidebar.markdown('<div style="font-size: 16px; margin-top: 8px; color: white;">Start your first entry ✨</div>', unsafe_allow_html=True)
     st.sidebar.markdown('</div>', unsafe_allow_html=True)
 
 # Privacy footer
@@ -425,7 +423,6 @@ with st.sidebar.expander("🔒 Private & Local", expanded=False):
 # ---------- SET CURRENT PAGE BASED ON NAVIGATION ----------
 page_map = {
     "journal": "📝 Journal",
-    "ai": "🤖 AI Analyzer", 
     "history": "📊 History",
     "selfcare": "🧰 Self-Care",
     "crisis": "🆘 Crisis Help"
@@ -433,116 +430,124 @@ page_map = {
 page = page_map[st.session_state.current_page]
 
 # ---------- MAIN CONTENT ----------
-# ---------- PAGE 1: JOURNAL ----------
+# ---------- PAGE 1: JOURNAL (with integrated AI) ----------
 if page == "📝 Journal":
     st.title("📝 Journal Your Day")
     st.caption(f"Today • {today.strftime('%A, %d %B %Y')}")
     
-    col1, col2 = st.columns([1, 1])
-    with col1:
+    # Create tabs for different journaling methods
+    journal_tab, ai_tab = st.tabs(["📝 Manual Journal", "🤖 AI-Powered Journal"])
+    
+    # ---------- TAB 1: MANUAL JOURNAL ----------
+    with journal_tab:
         st.markdown("### How are you feeling?")
-        mood = st.selectbox("Select your mood", MOODS, index=MOODS.index("Okay"), label_visibility="collapsed")
-    
-    note = st.text_area(
-        "What's on your mind?",
-        placeholder="Write freely... what happened today? How are you feeling?",
-        height=150
-    )
-    
-    if st.button("💾 Save Entry", use_container_width=True, type="primary"):
-        if not note.strip():
-            st.warning("Add a few words about your day before saving.")
-        else:
-            save_entry(mood, note, source="manual")
-            st.success("✅ Saved! Your entry has been added to your history.")
-    
-    st.divider()
-    st.markdown("""
-    💡 **Journaling tip:** Try to write without judgment. There's no right or wrong way to journal.
-    """)
-
-# ---------- PAGE 2: AI MOOD ANALYZER ----------
-elif page == "🤖 AI Analyzer":
-    st.title("🤖 AI Mood Analyzer")
-    st.caption(f"Today • {today.strftime('%A, %d %B %Y')}")
-    st.write("Write freely - the AI will help you understand your emotions.")
-    
-    journal_entry = st.text_area(
-        "How are you feeling right now?",
-        placeholder="e.g., I'm feeling overwhelmed with work and I don't know where to start...",
-        height=150
-    )
-    
-    # Character counter
-    if journal_entry:
-        words = len(journal_entry.split())
-        chars = len(journal_entry)
-        st.caption(f"📝 {words} words • {chars} characters")
-    
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        analyze_button = st.button("🔍 Analyze", type="primary", use_container_width=True)
-    
-    if analyze_button:
-        if not journal_entry.strip():
-            st.warning("Please write something to analyze.")
-        else:
-            # Check for crisis keywords
-            if check_crisis_keywords(journal_entry):
-                display_crisis_support()
+        
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            mood = st.selectbox("Select your mood", MOODS, index=MOODS.index("Okay"), label_visibility="collapsed")
+        
+        note = st.text_area(
+            "What's on your mind?",
+            placeholder="Write freely... what happened today? How are you feeling?",
+            height=150,
+            key="manual_journal"
+        )
+        
+        if st.button("💾 Save Entry", use_container_width=True, type="primary", key="save_manual"):
+            if not note.strip():
+                st.warning("Add a few words about your day before saving.")
             else:
-                with st.spinner("🧠 AI is analyzing your emotions..."):
-                    emotion, explanation = analyze_with_gemini(journal_entry)
-                
-                st.divider()
-                st.subheader("🧠 Analysis Result")
-                
-                if emotion != "Error":
-                    display_emotion_result(emotion, explanation)
-                    
-                    # Save to history
-                    save_entry(emotion, journal_entry, source="AI")
-                    
-                    # Quick self-care suggestion
-                    st.divider()
-                    st.subheader("💚 Quick Self-Care")
-                    
-                    if emotion in ["Sad", "Lonely", "Empty"]:
-                        st.info("**Try this:** Reach out to someone you trust. You don't have to go through this alone.")
-                        st.markdown("> *\"You are not alone in this.\"*")
-                    elif emotion in ["Anxious", "Stressed", "Overwhelmed", "Scared"]:
-                        st.info("**Try this:** Take 3 deep breaths. Breathe in for 4, out for 4.")
-                        st.markdown("> *\"This feeling will pass. You've gotten through hard days before.\"*")
-                    elif emotion in ["Angry", "Frustrated"]:
-                        st.info("**Try this:** Step away for 5 minutes. Drink water. Your feelings are valid.")
-                        st.markdown("> *\"It's okay to feel angry. What matters is how you respond.\"*")
-                    elif emotion in ["Tired"]:
-                        st.info("**Try this:** Rest is productive too. Give yourself permission to pause.")
-                        st.markdown("> *\"You've been doing your best. That's enough.\"*")
-                    elif emotion in ["Happy", "Excited", "Calm", "Grateful", "Hopeful"]:
-                        st.success("**Try this:** Savor this moment. What's one thing you're grateful for right now?")
-                        st.markdown("> *\"Small joys add up.\"*")
+                save_entry(mood, note, source="manual")
+                st.success("✅ Saved! Your entry has been added to your history.")
+        
+        st.divider()
+        st.markdown("""
+        💡 **Journaling tip:** Try to write without judgment. There's no right or wrong way to journal.
+        """)
+    
+    # ---------- TAB 2: AI-POWERED JOURNAL ----------
+    with ai_tab:
+        st.markdown("### ✨ Write freely - AI will detect your emotion")
+        st.write("Just type how you're feeling, and the AI will analyze your mood automatically.")
+        
+        journal_entry = st.text_area(
+            "How are you feeling right now?",
+            placeholder="e.g., I'm feeling overwhelmed with work and I don't know where to start...",
+            height=150,
+            key="ai_journal"
+        )
+        
+        # Character counter
+        if journal_entry:
+            words = len(journal_entry.split())
+            chars = len(journal_entry)
+            st.caption(f"📝 {words} words • {chars} characters")
+        
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            analyze_button = st.button("🔍 Analyze & Save", type="primary", use_container_width=True, key="analyze_ai")
+        
+        if analyze_button:
+            if not journal_entry.strip():
+                st.warning("Please write something to analyze.")
+            else:
+                # Check for crisis keywords
+                if check_crisis_keywords(journal_entry):
+                    display_crisis_support()
                 else:
-                    st.error(explanation)
-    
-    # Show recent AI entries
-    st.divider()
-    st.subheader("📋 Recent AI Analyses")
-    df = load_log()
-    ai_entries = df[df["source"] == "AI"].sort_values(by="date", ascending=False).head(3)
-    
-    if not ai_entries.empty:
-        for _, row in ai_entries.iterrows():
-            with st.container():
-                mood = row["mood"]
-                emoji = EMOTION_DATA.get(mood, {}).get("emoji", "📝")
-                st.markdown(f"**{emoji} {mood}** — {row['date']}")
-                st.caption(row["note"][:100] + "..." if len(row["note"]) > 100 else row["note"])
-                st.divider()
-    else:
-        st.info("No AI analyses yet. Try the analyzer above!")
+                    with st.spinner("🧠 AI is analyzing your emotions..."):
+                        emotion, explanation = analyze_with_gemini(journal_entry)
+                    
+                    st.divider()
+                    st.subheader("🧠 Analysis Result")
+                    
+                    if emotion != "Error":
+                        display_emotion_result(emotion, explanation)
+                        
+                        # Save to history
+                        save_entry(emotion, journal_entry, source="AI")
+                        st.success("✅ Saved! Your AI journal entry has been added to history.")
+                        
+                        # Quick self-care suggestion
+                        st.divider()
+                        st.subheader("💚 Quick Self-Care")
+                        
+                        if emotion in ["Sad", "Lonely", "Empty"]:
+                            st.info("**Try this:** Reach out to someone you trust. You don't have to go through this alone.")
+                            st.markdown("> *\"You are not alone in this.\"*")
+                        elif emotion in ["Anxious", "Stressed", "Overwhelmed", "Scared"]:
+                            st.info("**Try this:** Take 3 deep breaths. Breathe in for 4, out for 4.")
+                            st.markdown("> *\"This feeling will pass. You've gotten through hard days before.\"*")
+                        elif emotion in ["Angry", "Frustrated"]:
+                            st.info("**Try this:** Step away for 5 minutes. Drink water. Your feelings are valid.")
+                            st.markdown("> *\"It's okay to feel angry. What matters is how you respond.\"*")
+                        elif emotion in ["Tired"]:
+                            st.info("**Try this:** Rest is productive too. Give yourself permission to pause.")
+                            st.markdown("> *\"You've been doing your best. That's enough.\"*")
+                        elif emotion in ["Happy", "Excited", "Calm", "Grateful", "Hopeful"]:
+                            st.success("**Try this:** Savor this moment. What's one thing you're grateful for right now?")
+                            st.markdown("> *\"Small joys add up.\"*")
+                    else:
+                        st.error(explanation)
+        
+        # Show recent AI entries in a compact view
+        st.divider()
+        st.subheader("📋 Your Recent AI Journal Entries")
+        df = load_log()
+        ai_entries = df[df["source"] == "AI"].sort_values(by="date", ascending=False).head(3)
+        
+        if not ai_entries.empty:
+            for _, row in ai_entries.iterrows():
+                with st.container():
+                    mood = row["mood"]
+                    emoji = EMOTION_DATA.get(mood, {}).get("emoji", "📝")
+                    st.markdown(f"**{emoji} {mood}** — {row['date']}")
+                    st.caption(row["note"][:100] + "..." if len(row["note"]) > 100 else row["note"])
+                    st.divider()
+        else:
+            st.info("No AI journal entries yet. Try the analyzer above!")
 
-# ---------- PAGE 3: HISTORY ----------
+# ---------- PAGE 2: HISTORY ----------
 elif page == "📊 History":
     st.title("📊 Your Mood History")
     
@@ -656,7 +661,7 @@ elif page == "📊 History":
                 st.success("All entries cleared.")
                 st.rerun()
 
-# ---------- PAGE 4: SELF-CARE ----------
+# ---------- PAGE 3: SELF-CARE ----------
 elif page == "🧰 Self-Care":
     st.title("🧰 Self-Care Toolbox")
     st.caption("Quick exercises to help you feel grounded")
@@ -727,7 +732,7 @@ elif page == "🧰 Self-Care":
         for prompt in prompts:
             st.markdown(f"- {prompt}")
 
-# ---------- PAGE 5: CRISIS HELP ----------
+# ---------- PAGE 4: CRISIS HELP ----------
 else:  # Crisis Help
     st.title("🆘 Crisis Support - Singapore")
     st.caption("24/7 confidential helplines")
