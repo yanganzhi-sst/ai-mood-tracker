@@ -791,4 +791,5 @@ elif page == "🧰 Self-Care":
         st.subheader("Gentle Journal Prompts")
         
         prompts = [
-            "What's one thing I can control today?
+            "What's one thing I can control today?",
+            "What small moment
