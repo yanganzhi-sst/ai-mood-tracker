@@ -19,24 +19,13 @@ GEMINI_API_KEY = "AIzaSyD5xvU9HFoT3XpogoAoJ3EGR-v35AEbo_Y"
 genai.configure(api_key=GEMINI_API_KEY)
 GEMINI_MODEL = genai.GenerativeModel("gemini-2.5-flash")
 
-# Mood options for manual logging
-MOODS = [
-    "Happy", "Calm", "Okay", "Worried", "Anxious", "Stressed",
-    "Sad", "Angry", "Frustrated", "Tired"
-]
-
 # For charting: higher = better
 MOOD_SCORE = {
-    "Happy": 5,
-    "Calm": 4,
-    "Okay": 3,
-    "Worried": 2,
-    "Anxious": 2,
-    "Stressed": 1,
-    "Sad": 1,
-    "Angry": 1,
-    "Frustrated": 1,
-    "Tired": 2,
+    "Happy": 5, "Excited": 5, "Calm": 4, "Grateful": 4, "Hopeful": 4,
+    "Anxious": 2, "Stressed": 2, "Overwhelmed": 1, "Scared": 1,
+    "Sad": 1, "Lonely": 1, "Empty": 1, "Tired": 2,
+    "Angry": 1, "Frustrated": 1, "Guilty": 1, "Ashamed": 1,
+    "Okay": 3, "Worried": 2, "Neutral": 3
 }
 
 # ---------- EMOTION MAPPING FOR AI DETECTION ----------
@@ -67,6 +56,11 @@ EMOTION_DATA = {
     # Guilty/Ashamed
     "Guilty": {"emoji": "😞", "color": "error", "category": "Guilty", "score": 1},
     "Ashamed": {"emoji": "😶", "color": "error", "category": "Guilty", "score": 1},
+    
+    # Neutral/Fallback
+    "Okay": {"emoji": "😐", "color": "info", "category": "Neutral", "score": 3},
+    "Neutral": {"emoji": "😐", "color": "info", "category": "Neutral", "score": 3},
+    "Worried": {"emoji": "😟", "color": "warning", "category": "Anxious", "score": 2}
 }
 
 # ---------- CRISIS KEYWORDS (SINGAPORE CONTEXT) ----------
@@ -101,16 +95,13 @@ def load_log() -> pd.DataFrame:
             return pd.DataFrame(columns=["date", "mood", "note", "score", "source"])
     return pd.DataFrame(columns=["date", "mood", "note", "score", "source"])
 
-def save_entry(mood: str, note: str, source: str = "manual"):
+def save_entry(mood: str, note: str, source: str = "ai"):
     """Save mood entry to CSV with today's date"""
     entry_date = date.today().isoformat()
     df = load_log()
     
-    # Get score based on source
-    if source == "AI" and mood in EMOTION_DATA:
-        score = EMOTION_DATA[mood]["score"]
-    else:
-        score = MOOD_SCORE.get(mood, 3)
+    # Get score based on emotion
+    score = EMOTION_DATA.get(mood, {}).get("score", 3)
     
     new_row = {
         "date": entry_date,
@@ -134,7 +125,7 @@ def analyze_with_gemini(journal_text: str):
     **YOUR TASK:**
     1. Identify the single most dominant emotion from this list: 
        Happy, Excited, Calm, Grateful, Hopeful, Anxious, Stressed, Overwhelmed, 
-       Sad, Lonely, Angry, Frustrated, Tired, Empty, Scared, Ashamed, Guilty
+       Sad, Lonely, Angry, Frustrated, Tired, Empty, Scared, Ashamed, Guilty, Worried, Okay, Neutral
     
     2. Write ONE short, warm sentence explaining why you think they feel this way.
     
@@ -165,7 +156,7 @@ def analyze_with_gemini(journal_text: str):
                 
         return emotion, explanation
     except Exception as e:
-        return "Error", f"AI analysis failed: {str(e)}"
+        return "Neutral", f"AI analysis unavailable. Your entry was saved."
 
 def check_crisis_keywords(text: str) -> bool:
     """Check if text contains crisis keywords"""
@@ -338,6 +329,17 @@ st.sidebar.markdown("""
         color: #e0e0e0 !important;
     }
     
+    /* Make primary button greener */
+    .stButton button[kind="primary"] {
+        background-color: #0B6623 !important;
+        color: white !important;
+        font-weight: 600 !important;
+    }
+    .stButton button[kind="primary"]:hover {
+        background-color: #0A5C1F !important;
+        color: white !important;
+    }
+    
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -357,7 +359,7 @@ st.sidebar.markdown(f'''
 </div>
 ''', unsafe_allow_html=True)
 
-# Navigation options - UPDATED (removed AI Analyzer)
+# Navigation options - ONLY 4 PAGES
 nav_items = [
     {"icon": "📝", "label": "Journal", "id": "journal"},
     {"icon": "📊", "label": "History", "id": "history"},
@@ -430,122 +432,187 @@ page_map = {
 page = page_map[st.session_state.current_page]
 
 # ---------- MAIN CONTENT ----------
-# ---------- PAGE 1: JOURNAL (with integrated AI) ----------
+# ---------- PAGE 1: JOURNAL - UNIFIED, AUTO-ANALYZE ----------
 if page == "📝 Journal":
-    st.title("📝 Journal Your Day")
+    st.title("📝 MindEase Journal")
     st.caption(f"Today • {today.strftime('%A, %d %B %Y')}")
     
-    # Create tabs for different journaling methods
-    journal_tab, ai_tab = st.tabs(["📝 Manual Journal", "🤖 AI-Powered Journal"])
+    # Single journal text area - this is the ONLY input
+    journal_entry = st.text_area(
+        "How are you feeling?",
+        placeholder="Write anything... I'll understand how you're feeling and suggest ways to help.",
+        height=200
+    )
     
-    # ---------- TAB 1: MANUAL JOURNAL ----------
-    with journal_tab:
-        st.markdown("### How are you feeling?")
-        
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            mood = st.selectbox("Select your mood", MOODS, index=MOODS.index("Okay"), label_visibility="collapsed")
-        
-        note = st.text_area(
-            "What's on your mind?",
-            placeholder="Write freely... what happened today? How are you feeling?",
-            height=150,
-            key="manual_journal"
-        )
-        
-        if st.button("💾 Save Entry", use_container_width=True, type="primary", key="save_manual"):
-            if not note.strip():
-                st.warning("Add a few words about your day before saving.")
-            else:
-                save_entry(mood, note, source="manual")
-                st.success("✅ Saved! Your entry has been added to your history.")
-        
-        st.divider()
-        st.markdown("""
-        💡 **Journaling tip:** Try to write without judgment. There's no right or wrong way to journal.
-        """)
+    # Character counter
+    if journal_entry:
+        words = len(journal_entry.split())
+        chars = len(journal_entry)
+        st.caption(f"📝 {words} words • {chars} characters")
     
-    # ---------- TAB 2: AI-POWERED JOURNAL ----------
-    with ai_tab:
-        st.markdown("### ✨ Write freely - AI will detect your emotion")
-        st.write("Just type how you're feeling, and the AI will analyze your mood automatically.")
-        
-        journal_entry = st.text_area(
-            "How are you feeling right now?",
-            placeholder="e.g., I'm feeling overwhelmed with work and I don't know where to start...",
-            height=150,
-            key="ai_journal"
-        )
-        
-        # Character counter
-        if journal_entry:
-            words = len(journal_entry.split())
-            chars = len(journal_entry)
-            st.caption(f"📝 {words} words • {chars} characters")
-        
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            analyze_button = st.button("🔍 Analyze & Save", type="primary", use_container_width=True, key="analyze_ai")
-        
-        if analyze_button:
-            if not journal_entry.strip():
-                st.warning("Please write something to analyze.")
-            else:
-                # Check for crisis keywords
-                if check_crisis_keywords(journal_entry):
-                    display_crisis_support()
-                else:
-                    with st.spinner("🧠 AI is analyzing your emotions..."):
-                        emotion, explanation = analyze_with_gemini(journal_entry)
-                    
-                    st.divider()
-                    st.subheader("🧠 Analysis Result")
-                    
-                    if emotion != "Error":
-                        display_emotion_result(emotion, explanation)
-                        
-                        # Save to history
-                        save_entry(emotion, journal_entry, source="AI")
-                        st.success("✅ Saved! Your AI journal entry has been added to history.")
-                        
-                        # Quick self-care suggestion
-                        st.divider()
-                        st.subheader("💚 Quick Self-Care")
-                        
-                        if emotion in ["Sad", "Lonely", "Empty"]:
-                            st.info("**Try this:** Reach out to someone you trust. You don't have to go through this alone.")
-                            st.markdown("> *\"You are not alone in this.\"*")
-                        elif emotion in ["Anxious", "Stressed", "Overwhelmed", "Scared"]:
-                            st.info("**Try this:** Take 3 deep breaths. Breathe in for 4, out for 4.")
-                            st.markdown("> *\"This feeling will pass. You've gotten through hard days before.\"*")
-                        elif emotion in ["Angry", "Frustrated"]:
-                            st.info("**Try this:** Step away for 5 minutes. Drink water. Your feelings are valid.")
-                            st.markdown("> *\"It's okay to feel angry. What matters is how you respond.\"*")
-                        elif emotion in ["Tired"]:
-                            st.info("**Try this:** Rest is productive too. Give yourself permission to pause.")
-                            st.markdown("> *\"You've been doing your best. That's enough.\"*")
-                        elif emotion in ["Happy", "Excited", "Calm", "Grateful", "Hopeful"]:
-                            st.success("**Try this:** Savor this moment. What's one thing you're grateful for right now?")
-                            st.markdown("> *\"Small joys add up.\"*")
-                    else:
-                        st.error(explanation)
-        
-        # Show recent AI entries in a compact view
-        st.divider()
-        st.subheader("📋 Your Recent AI Journal Entries")
-        df = load_log()
-        ai_entries = df[df["source"] == "AI"].sort_values(by="date", ascending=False).head(3)
-        
-        if not ai_entries.empty:
-            for _, row in ai_entries.iterrows():
-                with st.container():
-                    mood = row["mood"]
-                    emoji = EMOTION_DATA.get(mood, {}).get("emoji", "📝")
-                    st.markdown(f"**{emoji} {mood}** — {row['date']}")
-                    st.caption(row["note"][:100] + "..." if len(row["note"]) > 100 else row["note"])
-                    st.divider()
+    # Green save & analyze button
+    save_button = st.button("💾 Save & Analyze Entry", use_container_width=True, type="primary", key="save_analyze")
+    
+    if save_button:
+        if not journal_entry.strip():
+            st.warning("Please write something before saving.")
         else:
-            st.info("No AI journal entries yet. Try the analyzer above!")
+            # Check for crisis keywords FIRST
+            if check_crisis_keywords(journal_entry):
+                display_crisis_support()
+                # Save as crisis entry
+                save_entry("Crisis", journal_entry, source="crisis")
+                st.success("✅ Entry saved. Please reach out for support.")
+            else:
+                # Analyze with Gemini
+                with st.spinner("🧠 Analyzing your emotions..."):
+                    emotion, explanation = analyze_with_gemini(journal_entry)
+                
+                # Display result in a beautiful container
+                st.divider()
+                
+                # Show emotion result
+                display_emotion_result(emotion, explanation)
+                
+                # Save to history
+                save_entry(emotion, journal_entry, source="ai")
+                st.success("✅ Journal saved and analyzed!")
+                
+                # ---------- BETTER SELF-CARE SUGGESTIONS ----------
+                st.divider()
+                st.subheader("💚 Personalized Self-Care")
+                
+                # Create expandable sections for each emotion type
+                if emotion in ["Happy", "Excited", "Calm", "Grateful", "Hopeful"]:
+                    with st.expander("🌿 Savor This Moment", expanded=True):
+                        st.markdown("""
+                        **You're in a positive space right now. Here's how to nurture it:**
+                        
+                        ✨ **Gratitude pause** - What's one thing you're thankful for right now?
+                        📝 **Capture this feeling** - Write down what's going well
+                        🌅 **Savor** - Take 30 seconds to really feel this moment
+                        🎵 **Celebrate** - Listen to a song that matches your mood
+                        
+                        > *"Happiness is not something you postpone for the future; it is something you design for the present."*
+                        """)
+                
+                elif emotion in ["Anxious", "Stressed", "Overwhelmed", "Scared", "Worried"]:
+                    with st.expander("🌀 Calm Your Mind", expanded=True):
+                        st.markdown("""
+                        **Your nervous system needs soothing right now. Try these:**
+                        
+                        🌬️ **4-7-8 Breathing** - Inhale 4, Hold 7, Exhale 8 (repeat 4x)
+                        🖐️ **Palm pressure** - Press your thumb into your opposite palm
+                        ❄️ **Cold splash** - Run cold water over your wrists
+                        🌳 **5-4-3-2-1** - Name 5 things you see, 4 you feel, 3 you hear...
+                        ☕ **Warm drink** - Hold something warm and focus on the sensation
+                        
+                        > *"This feeling is temporary. You've survived 100% of your bad days."*
+                        """)
+                
+                elif emotion in ["Sad", "Lonely", "Empty"]:
+                    with st.expander("💙 Gentle Comfort", expanded=True):
+                        st.markdown("""
+                        **Be kind to yourself right now. Here's what helps:**
+                        
+                        🤗 **Self-compassion break** - Place hand on heart: "This is hard. I'm not alone."
+                        📞 **Reach out** - Text or call one person you trust
+                        🧣 **Cozy moment** - Wrap yourself in something soft, make tea
+                        🎧 **Comfort media** - Put on a familiar show or song that feels safe
+                        🌙 **Permission to rest** - You don't have to be productive today
+                        
+                        > *"You are allowed to feel sad. You are still worthy of love and connection."*
+                        """)
+                
+                elif emotion in ["Angry", "Frustrated"]:
+                    with st.expander("🔥 Release Tension", expanded=True):
+                        st.markdown("""
+                        **Your anger is valid. Here's how to channel it:**
+                        
+                        🏃 **Physical release** - 1 minute of jumping jacks or shaking your body
+                        ✍️ **Write it out** - Type everything you're angry about, then delete it
+                        🧊 **Cool down** - Hold an ice cube or splash cold water on your face
+                        🗣️ **Name it** - Say out loud: "I am angry because..." 
+                        🚶 **Change scenery** - Step outside for 2 minutes
+                        
+                        > *"Anger is a messenger. Listen to what it's telling you, then release it."*
+                        """)
+                
+                elif emotion in ["Tired"]:
+                    with st.expander("😴 Rest & Recharge", expanded=True):
+                        st.markdown("""
+                        **You're running on empty. Here's how to refill:**
+                        
+                        ⏸️ **Guilt-free pause** - Rest is productive. Do nothing for 5 minutes.
+                        💤 **Power nap** - 20 minutes max, set an alarm
+                        🧘 **Body scan** - Close your eyes, notice tension, breathe into it
+                        🍵 **Hydrate** - Drink a full glass of water
+                        🌿 **Low stimulation** - Dim lights, silence notifications
+                        
+                        > *"You are not a machine. Rest is not a reward for exhaustion—it's a necessity."*
+                        """)
+                
+                elif emotion in ["Guilty", "Ashamed"]:
+                    with st.expander("🕊️ Self-Forgiveness", expanded=True):
+                        st.markdown("""
+                        **You deserve compassion. Try this:**
+                        
+                        💬 **Talk to yourself like a friend** - What would you say to someone you love?
+                        📝 **Write a forgiveness letter** - To yourself, you don't have to send it
+                        🌅 **Fresh start** - Tomorrow is new. This moment is new.
+                        🤝 **Connect** - Shame thrives in secrecy. Share with someone safe.
+                        
+                        > *"You are human. You are learning. You are enough."*
+                        """)
+                
+                elif emotion in ["Okay", "Neutral"]:
+                    with st.expander("🌱 Gentle Check-In", expanded=True):
+                        st.markdown("""
+                        **You're feeling okay. That's perfectly fine. Here's a gentle check-in:**
+                        
+                        💭 **What do you need right now?** (Rest? Connection? Movement? Silence?)
+                        🎯 **What's one tiny step you can take?**
+                        🌟 **What's one small thing that went well today?**
+                        📖 **Read this:** "You don't have to feel amazing every day. 'Okay' is enough."
+                        
+                        > *"Peace is not the absence of chaos, but the presence of calm in the midst of it."*
+                        """)
+                
+                else:
+                    with st.expander("🌱 Check-In", expanded=True):
+                        st.markdown("""
+                        **Take a moment with yourself:**
+                        
+                        💭 **What do I need right now?** (Rest? Connection? Movement? Silence?)
+                        🎯 **What's one tiny step I can take?**
+                        🤔 **If I felt better, what would be different?**
+                        
+                        > *"Small steps are still progress."*
+                        """)
+    
+    # Show recent entries at the bottom (collapsible)
+    st.divider()
+    with st.expander("📋 Your Recent Journal Entries", expanded=False):
+        df = load_log()
+        if not df.empty:
+            recent_entries = df.sort_values(by="date", ascending=False).head(5)
+            for _, row in recent_entries.iterrows():
+                mood = row["mood"]
+                emoji = EMOTION_DATA.get(mood, {}).get("emoji", "📝")
+                
+                # Source icon
+                if row["source"] == "crisis":
+                    source_icon = "🚨"
+                elif row["source"] == "ai":
+                    source_icon = "🤖"
+                else:
+                    source_icon = "📝"
+                
+                st.markdown(f"**{emoji} {mood}** {source_icon} • {row['date']}")
+                st.caption(row["note"][:100] + "..." if len(row["note"]) > 100 else row["note"])
+                st.divider()
+        else:
+            st.info("No journal entries yet. Write your first entry above!")
 
 # ---------- PAGE 2: HISTORY ----------
 elif page == "📊 History":
@@ -553,7 +620,7 @@ elif page == "📊 History":
     
     df = load_log()
     if df.empty:
-        st.info("No entries yet. Start by journaling or using the AI analyzer.")
+        st.info("No entries yet. Start by journaling!")
     else:
         # Convert date column
         df["date"] = pd.to_datetime(df["date"])
@@ -581,14 +648,12 @@ elif page == "📊 History":
         with col2:
             source_filter = st.selectbox(
                 "Type",
-                ["All entries", "Manual only", "AI only"],
+                ["All entries", "Journal only"],
                 index=0
             )
         
-        if source_filter == "Manual only":
-            filtered_df = filtered_df[filtered_df["source"] == "manual"]
-        elif source_filter == "AI only":
-            filtered_df = filtered_df[filtered_df["source"] == "AI"]
+        if source_filter == "Journal only":
+            filtered_df = filtered_df[filtered_df["source"] == "ai"]
         
         # Sort by date
         filtered_df = filtered_df.sort_values("date", ascending=False)
@@ -643,9 +708,14 @@ elif page == "📊 History":
                 with col1:
                     mood = row["mood"]
                     emoji = EMOTION_DATA.get(mood, {}).get("emoji", "📝")
-                    source_icon = "📝" if row["source"] == "manual" else "🤖"
+                    
+                    if row["source"] == "crisis":
+                        source_icon = "🚨"
+                    else:
+                        source_icon = "🤖"
+                    
                     st.markdown(f"**{emoji}**")
-                    st.caption(f"{source_icon} {row['source']}")
+                    st.caption(f"{source_icon}")
                 with col2:
                     st.markdown(f"**{mood}** • {row['date'].strftime('%b %d, %Y')}")
                     if pd.notna(row["note"]) and row["note"]:
@@ -721,57 +791,4 @@ elif page == "🧰 Self-Care":
         st.subheader("Gentle Journal Prompts")
         
         prompts = [
-            "What's one thing I can control today?",
-            "What small moment brought me peace recently?",
-            "If my best friend felt this way, what would I tell them?",
-            "What's one thing I did well today, even if small?",
-            "What do I need right now, in this moment?",
-            "What's something I'm looking forward to?"
-        ]
-        
-        for prompt in prompts:
-            st.markdown(f"- {prompt}")
-
-# ---------- PAGE 4: CRISIS HELP ----------
-else:  # Crisis Help
-    st.title("🆘 Crisis Support - Singapore")
-    st.caption("24/7 confidential helplines")
-    
-    display_safety_block()
-    
-    st.divider()
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        ### 🧑‍🤝‍🧑 For Youth
-        - **CHAT (youth mental health)**: 6493 6500
-        - **Tinkle Friend**: 1800 274 4788
-        - **eCounselling Centre**: chat.mentalhealth.sg
-        
-        ### 👨‍👩‍👧 For Families
-        - **Care Corner Counselling**: 1800 353 5800
-        - **Fei Yue Family Service**: 6819 9170
-        """)
-    
-    with col2:
-        st.markdown("""
-        ### 🏥 Professional Help
-        - **IMH Appointment**: 6389 2000
-        - **SGH Psychiatry**: 6321 4377
-        - **NUH Psychiatry**: 6772 2000
-        
-        ### 💻 Online Support
-        - **SOS Chat**: sos.org.sg
-        - **Mindline.sg**: mindline.sg
-        - **EC2 (SAMH)**: samhealth.org.sg
-        """)
-    
-    st.divider()
-    st.warning("""
-    **If you or someone else is in immediate danger, please call 995 now.**
-    
-    These helplines are confidential and staffed by trained professionals.
-    You don't need to be in crisis to call - they're here to listen.
-    """)
+            "What's one thing I can control today?
