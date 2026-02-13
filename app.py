@@ -215,6 +215,472 @@ def display_emotion_result(emotion: str, explanation: str):
     else:
         st.info(f"{emoji} **{emotion}**\n\n{explanation}")
 
+# ---------- IMPROVED SELF-CARE FUNCTIONS ----------
+def get_self_care_suggestions(emotion: str):
+    """Return detailed, actionable self-care suggestions based on emotion"""
+    
+    suggestions = {
+        # ----------------------------------------
+        # ANXIETY & STRESS
+        # ----------------------------------------
+        "Anxious": {
+            "title": "🌀 Calm Your Nervous System",
+            "color": "warning",
+            "quick_relief": [
+                "🌬️ **4-7-8 Breathing:** Inhale 4 sec → Hold 7 sec → Exhale 8 sec. Repeat 4 times.",
+                "❄️ **Cold Water:** Splash cold water on your wrists and face. This triggers the 'mammalian dive reflex' and slows your heart rate.",
+                "🖐️ **Palm Pressure:** Press your thumb firmly into your opposite palm for 30 seconds.",
+                "🌳 **5-4-3-2-1 Grounding:** Name 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste."
+            ],
+            "mental_shifts": [
+                "🧠 **Name It to Tame It:** Say out loud: 'I am feeling anxious right now. This is just a feeling, and it will pass.'",
+                "📅 **Worry Time:** Postpone your worry. Tell yourself: 'I will worry about this at 7pm for 15 minutes. Not now.'",
+                "🎯 **Control Check:** What's ONE small thing you can control right now? Do that thing."
+            ],
+            "physical": [
+                "🚶 **Walk for 5 minutes** without your phone. Feel your feet on the ground.",
+                "🙆 **Shoulder rolls:** Roll your shoulders backward 10 times. We hold anxiety in our shoulders.",
+                "💧 **Drink water:** Dehydration mimics anxiety symptoms. Drink a full glass slowly."
+            ],
+            "quote": "Anxiety is a wave. You can't stop it, but you can learn to surf.",
+            "affirmation": "I am safe in this moment. This feeling is temporary."
+        },
+        
+        "Stressed": {
+            "title": "📉 Lower Your Stress Level",
+            "color": "warning",
+            "quick_relief": [
+                "✋ **STOP Technique:** Stop what you're doing, Take a breath, Observe how you feel, Proceed with kindness.",
+                "⏸️ **The 2-Minute Rule:** If something takes less than 2 minutes, do it now. If not, write it down for later.",
+                "📋 **Brain Dump:** Write down everything in your head. Don't organize, just dump. Close the notebook."
+            ],
+            "mental_shifts": [
+                "🎯 **One Thing:** What's the ONE thing that matters most right now? Do just that.",
+                "🚫 **Permission to say no:** You are allowed to protect your energy. Not everything is urgent.",
+                "🌟 **Progress > Perfection:** Done is better than perfect. Lower the bar today."
+            ],
+            "physical": [
+                "☕ **Warm drink:** Hold a warm cup of tea. Focus on the warmth in your hands.",
+                "🧘 **Neck stretch:** Slowly tilt your ear toward your shoulder. Hold 30 seconds each side.",
+                "👣 **Barefoot:** Take your socks off and press your feet into the floor."
+            ],
+            "quote": "You don't have to see the whole staircase. Just take the first step.",
+            "affirmation": "I am capable. I can handle this one step at a time."
+        },
+        
+        "Overwhelmed": {
+            "title": "🌊 Reduce Overwhelm",
+            "color": "warning",
+            "quick_relief": [
+                "🛑 **Emergency Pause:** Stop everything. Set a timer for 5 minutes. Do nothing but breathe.",
+                "📦 **The Box Method:** Imagine putting your worries in a box and closing the lid. You can open it later.",
+                "🎯 **Micro-Step:** What's the TINIEST thing you can do? Open a document. Pick up one sock. Start there."
+            ],
+            "mental_shifts": [
+                "🧹 **Single-task:** Multitasking is a myth. Do ONE thing at a time.",
+                "🗣️ **Ask for help:** 'I'm overwhelmed, can you help me with [specific task]?'",
+                "📉 **Lower expectations:** Today, 'good enough' is enough. You can do more tomorrow."
+            ],
+            "physical": [
+                "🧣 **Warm compress:** Place a warm towel or heating pad on your chest or shoulders.",
+                "🎧 **Brown noise:** Put on brown noise or rain sounds. Lower stimulation.",
+                "🛋️ **Horizontal:** Lie down flat for 5 minutes. Let your body decompress."
+            ],
+            "quote": "You don't have to do everything today. Breathe. Prioritize. Let some things wait.",
+            "affirmation": "I am allowed to pause. The world will wait for me."
+        },
+        
+        "Scared": {
+            "title": "🕯️ Find Safety",
+            "color": "warning",
+            "quick_relief": [
+                "🤝 **Self-holding:** Cross your arms over your chest and give yourself a gentle squeeze (butterfly hug).",
+                "🧸 **Safe object:** Hold something soft or comforting. A pillow, a blanket, a stuffed animal.",
+                "🏠 **Safe space:** Close your eyes and imagine a place where you feel completely safe. Describe it in detail."
+            ],
+            "mental_shifts": [
+                "🌍 **Check the facts:** 'Am I actually in danger right now, or am I remembering/anticipating danger?'",
+                "👤 **Your adult self:** Your younger self needed protection. Your current self can provide it.",
+                "📆 **Future self:** Imagine yourself one week from now. This fear will be smaller."
+            ],
+            "physical": [
+                "🦶 **Feet on floor:** Press your feet firmly into the ground. Feel the solid earth beneath you.",
+                "🫂 **Weighted blanket:** If available, use a heavy blanket. Deep pressure is calming.",
+                "🔦 **Turn on lights:** Darkness amplifies fear. Make your space bright."
+            ],
+            "quote": "Fear is a compass pointing to what matters. But you don't have to let it drive.",
+            "affirmation": "I am safe right now. I can protect myself."
+        },
+        
+        "Worried": {
+            "title": "🧘 Quiet the Worry Mind",
+            "color": "warning",
+            "quick_relief": [
+                "📝 **Worry list:** Write down every worry. Then rate each: 'Can I do something about this now?'",
+                "⏰ **Worry appointment:** Schedule worry for later. 'I'll worry about this at 6pm for 10 minutes.'",
+                "🎲 **Distract:** Do something that requires focus. A puzzle, a game, a recipe."
+            ],
+            "mental_shifts": [
+                "📊 **Probability check:** 'What's the actual likelihood of this happening? What's a more likely outcome?'",
+                "🤝 **Friend test:** 'What would I tell a friend who had this worry?'",
+                "🔮 **Best/worst/most likely:** What's the best case? Worst case? Most likely? Focus on most likely."
+            ],
+            "physical": [
+                "🫁 **Long exhale:** Breathe in for 4, out for 6. Longer exhales activate the parasympathetic system.",
+                "🧴 **Scent grounding:** Use a strong scent - mint, citrus, coffee. Focus entirely on the smell.",
+                "👀 **Soft gaze:** Unfocus your eyes and look at the horizon or a blank wall."
+            ],
+            "quote": "Worrying is like praying for what you don't want to happen.",
+            "affirmation": "I release what I cannot control. I handle what I can."
+        },
+        
+        # ----------------------------------------
+        # SADNESS & LONELINESS
+        # ----------------------------------------
+        "Sad": {
+            "title": "💙 Gentle Comfort for Sadness",
+            "color": "error",
+            "quick_relief": [
+                "🤗 **Self-hug:** Wrap your arms around yourself. Rock gently side to side.",
+                "☕ **Warm comfort:** Make tea, hot chocolate, or soup. Hold the warm cup in both hands.",
+                "🎵 **Sad playlist:** Listen to music that matches your mood, then gradually shift to something slightly more upbeat."
+            ],
+            "mental_shifts": [
+                "💬 **Inner critic vs inner friend:** What would you say to a sad friend? Say that to yourself.",
+                "📸 **Photo memory:** Look at one photo that brings a small smile. Stay with that feeling for 30 seconds.",
+                "🌧️ **Rain metaphor:** Sadness is rain. It waters things. You don't have to like it, but it won't last forever."
+            ],
+            "physical": [
+                "🧣 **Cozy sensory:** Wrap yourself in something soft. A blanket, a hoodie, a scarf.",
+                "🕯️ **Candle:** Light a candle and watch the flame. Let your thoughts settle.",
+                "🌙 **Rest:** Give yourself permission to do nothing. Sadness is exhausting."
+            ],
+            "quote": "Sadness is not weakness. It is the price of being human.",
+            "affirmation": "I am allowed to feel sad. This feeling will pass."
+        },
+        
+        "Lonely": {
+            "title": "🤝 Reconnect",
+            "color": "error",
+            "quick_relief": [
+                "📱 **One message:** Text or call ONE person. Just 'Hey, thinking of you.'",
+                "🎧 **Podcast:** Put on a conversation-based podcast. Hear human voices.",
+                "🐾 **Pet time:** Spend 5 minutes with an animal. If none, watch animal videos."
+            ],
+            "mental_shifts": [
+                "🌍 **Shared humanity:** Remember: thousands of people feel lonely right now. You are not actually alone in this.",
+                "💭 **Quality > Quantity:** One meaningful connection matters more than 100 superficial ones.",
+                "☕ **Third place:** Go somewhere with people - a café, library, park. Just be around others."
+            ],
+            "physical": [
+                "🫂 **Weighted pressure:** Use a heavy blanket or stack pillows on your lap.",
+                "🌡️ **Warmth:** Take a warm shower or bath. Warmth mimics social connection.",
+                "🪑 **Sit outside:** Even 5 minutes in public space can help."
+            ],
+            "quote": "Loneliness is not the absence of people, but the absence of connection.",
+            "affirmation": "I am worthy of connection. I will reach out."
+        },
+        
+        "Empty": {
+            "title": "🕳️ Gentle Filling",
+            "color": "error",
+            "quick_relief": [
+                "🎨 **Small creation:** Draw a squiggle, color something, arrange flowers, stack stones.",
+                "🎵 **One song:** Find one song that used to make you feel something. Just listen.",
+                "🌱 **Tiny task:** Make your bed, water a plant, wash three dishes. Small proof of your impact."
+            ],
+            "mental_shifts": [
+                "🔍 **Curiosity:** 'I feel nothing right now. I wonder what that's about?' No judgment, just observation.",
+                "📝 **Sensation check:** What do you notice in your body? Temperature? Tension? Hunger?",
+                "⏳ **This is temporary:** Emptiness is not forever. It's a resting state."
+            ],
+            "physical": [
+                "🍊 **Taste something strong:** Lemon, mint, ginger. Focus completely on the flavor.",
+                "❄️ **Temperature change:** Step outside. Cold air can help you feel present.",
+                "💪 **Gentle movement:** Stretch, shake your hands, roll your neck."
+            ],
+            "quote": "Emptiness is not a void to fill, but space to notice.",
+            "affirmation": "I am here. That is enough."
+        },
+        
+        "Tired": {
+            "title": "😴 True Rest",
+            "color": "info",
+            "quick_relief": [
+                "⏸️ **Guilt-free pause:** Rest is productive. Set a timer for 10 minutes. Do absolutely nothing.",
+                "💤 **Power nap:** 20 minutes max. Set an alarm. Even just lying down helps.",
+                "🫁 **Yawn:** Fake yawn until a real one comes. It signals your nervous system to relax."
+            ],
+            "mental_shifts": [
+                "🚫 **Permission slip:** 'I give myself permission to not be productive right now.'",
+                "📉 **Lower the bar:** Today's goal is survival and rest. That's enough.",
+                "💭 **Not lazy, just tired:** You're not failing. You're depleted. These are different things."
+            ],
+            "physical": [
+                "💧 **Hydrate:** Fatigue is often dehydration. Drink a full glass of water.",
+                "🦵 **Legs up the wall:** Lie on floor, rest legs against wall. 5 minutes. Restores blood flow.",
+                "🌿 **Dim lights:** Lower screen brightness, turn off overhead lights."
+            ],
+            "quote": "You are not a machine. Rest is not a reward for exhaustion—it's a necessity.",
+            "affirmation": "I am allowed to rest. My worth is not my productivity."
+        },
+        
+        # ----------------------------------------
+        # ANGER & FRUSTRATION
+        # ----------------------------------------
+        "Angry": {
+            "title": "🔥 Release Anger Safely",
+            "color": "error",
+            "quick_relief": [
+                "🏃 **Move your body:** 1 minute of jumping jacks, running in place, or shaking your whole body.",
+                "✍️ **Write & destroy:** Type everything you're angry about, then delete it. Or write on paper and tear it up.",
+                "🧊 **Cold shock:** Hold an ice cube. Splash cold water on your face. The cold resets your nervous system."
+            ],
+            "mental_shifts": [
+                "🗣️ **Name it:** 'I am angry because ______.' Speaking the reason reduces its power.",
+                "🔍 **Beneath the anger:** Anger is often a protector. What's underneath? Hurt? Fear? Injustice?",
+                "🚶 **Walk away:** It's okay to remove yourself. You can return to the conversation later."
+            ],
+            "physical": [
+                "🦷 **Check your jaw:** Are you clenching? Unclench. Let your tongue rest at the bottom of your mouth.",
+                "👊 **Progressive relaxation:** Squeeze fists tight → hold → release. Feel the release.",
+                "🧴 **Cold wrists:** Run cold water over your wrists for 30 seconds."
+            ],
+            "quote": "Anger is a messenger. Listen to what it's telling you, then let it go.",
+            "affirmation": "I am in control of how I respond. I choose calm."
+        },
+        
+        "Frustrated": {
+            "title": "😤 Unblock & Reset",
+            "color": "error",
+            "quick_relief": [
+                "⏸️ **Step away:** Physically leave the frustrating situation. 5 minutes minimum.",
+                "🔄 **Switch tasks:** Do something completely different for 10 minutes, then return.",
+                "🎯 **Small win:** Find ONE tiny thing you can complete successfully. Check it off."
+            ],
+            "mental_shifts": [
+                "🌊 **'This too shall pass'** - Frustration is temporary. It will peak and subside.",
+                "🤔 **What's the block?** Is it skill? Resource? Support? Identify it specifically.",
+                "📉 **Lower expectations:** You're allowed to struggle. Struggle is learning."
+            ],
+            "physical": [
+                "😤 **Sigh:** Exaggerated, loud sigh. Do it 3 times. It releases tension.",
+                "🙆 **Open chest:** Clasp hands behind back, open chest, breathe deeply.",
+                "🦋 **Butterfly taps:** Cross arms, tap alternately on chest. Bilateral stimulation calms."
+            ],
+            "quote": "Frustration means you care. Use it as fuel, not friction.",
+            "affirmation": "I can handle setbacks. I will try again."
+        },
+        
+        # ----------------------------------------
+        # GUILT & SHAME
+        # ----------------------------------------
+        "Guilty": {
+            "title": "🕊️ Release Guilt",
+            "color": "error",
+            "quick_relief": [
+                "📝 **Name the mistake:** Write what happened. 'I did X. It had Y impact. I feel guilty.'",
+                "🤝 **Make amends (small):** If possible, one small repair. A message, an apology, a fix.",
+                "💬 **Talk to yourself like a friend:** 'You made a mistake. You're still a good person.'"
+            ],
+            "mental_shifts": [
+                "📊 **Is this guilt or shame?** Guilt = 'I did something bad.' Shame = 'I am bad.' You did, you are not.",
+                "🌱 **Learn vs. Ruminate:** What can you learn? What will you do differently? Done.",
+                "⏪ **You did what you could with what you knew.** Hindsight is clearer. Be kind to your past self."
+            ],
+            "physical": [
+                "🫂 **Self-compassion break:** Hand on heart. 'This is hard. I'm not alone. May I be kind to myself.'",
+                "🧘 **Open posture:** Don't curl inward. Open your chest, sit upright.",
+                "💧 **Wash hands:** Symbolically wash away the mistake."
+            ],
+            "quote": "Guilt says you've done something wrong. Shame says you ARE wrong. One is true. One is not.",
+            "affirmation": "I am not my mistakes. I can grow and do better."
+        },
+        
+        "Ashamed": {
+            "title": "🕊️ Self-Forgiveness",
+            "color": "error",
+            "quick_relief": [
+                "🫂 **Butterfly hug:** Cross arms, tap alternately on chest. 20 taps. 'I am worthy of compassion.'",
+                "📝 **Write a forgiveness letter:** To yourself. You don't have to send it. Just write it.",
+                "🧸 **Inner child:** Imagine your younger self. What do they need to hear? Tell them."
+            ],
+            "mental_shifts": [
+                "🔓 **Shame thrives in secrecy.** Share with one safe person. 'I feel ashamed about...'",
+                "🌍 **You are not alone.** Almost everyone carries shame. It's a human experience, not a personal failing.",
+                "🌟 **Separate action from identity:** You did something vs. You are something. Choose the first."
+            ],
+            "physical": [
+                "🫀 **Heart focus:** Place both hands on your heart. Feel the warmth. Breathe into your heart center.",
+                "🧣 **Wrap yourself:** Physical warmth and pressure. A blanket, a coat, a hug.",
+                "👁️ **Soft gaze:** Look in a mirror and say your name. 'I see you. You are enough.'"
+            ],
+            "quote": "Shame cannot survive empathy. Be the first person to offer yourself some.",
+            "affirmation": "I am worthy of love and belonging, exactly as I am."
+        },
+        
+        # ----------------------------------------
+        # POSITIVE EMOTIONS
+        # ----------------------------------------
+        "Happy": {
+            "title": "🌿 Savor This Moment",
+            "color": "success",
+            "quick_relief": [
+                "📸 **Capture it:** Write down exactly what's making you happy right now. Be specific.",
+                "🧠 **30-second savor:** Close your eyes and really feel this happiness for 30 seconds. Where is it in your body?",
+                "🙏 **Gratitude ping:** Text one person something you appreciate about them. Right now."
+            ],
+            "mental_shifts": [
+                "💭 **'This is happiness.'** Label the moment. Not 'I was happy' or 'I will be happy' - I AM happy.",
+                "📝 **Joy log:** Add this to your mental list of things that bring you joy. Come back to it later.",
+                "🎁 **Happiness is not a destination.** It's moments like this. You found one."
+            ],
+            "physical": [
+                "😊 **Smile:** Even if forced, smiling signals safety to your brain. Hold it for 20 seconds.",
+                "🌞 **Look up:** Tilt your chin up, open your posture. Let yourself receive this moment.",
+                "🫁 **Breathe it in:** Deep breath, imagine breathing in this good feeling."
+            ],
+            "quote": "Happiness is not something you postpone for the future; it is something you design for the present.",
+            "affirmation": "I deserve to feel good. I welcome joy."
+        },
+        
+        "Calm": {
+            "title": "🧘 Deepen Your Calm",
+            "color": "success",
+            "quick_relief": [
+                "🌊 **Ride the wave:** Notice this calm feeling. Don't cling to it, just observe it.",
+                "☕ **Slow moment:** Do one thing slowly. Drink water slowly. Walk slowly. Breathe slowly.",
+                "👂 **Listen:** Close your eyes. What's the quietest sound you can hear?"
+            ],
+            "mental_shifts": [
+                "💭 **'This is enough.'** You don't need to chase excitement. Calm is complete.",
+                "🧘 **Stillness practice:** 2 minutes of doing absolutely nothing. You've already succeeded.",
+                "📚 **Calm is a resource:** Store this feeling. Remember it. You can return here."
+            ],
+            "physical": [
+                "🫁 **Even breath:** Inhale 4, exhale 4. No pause needed. Just even, steady breath.",
+                "👐 **Open palms:** Turn palms up on your lap. Receptive, open, calm.",
+                "🧣 **Soft eyes:** Relax your gaze. Soften your face."
+            ],
+            "quote": "Peace is not the absence of chaos, but the presence of calm in the midst of it.",
+            "affirmation": "I am at peace with this moment."
+        },
+        
+        "Grateful": {
+            "title": "🙏 Amplify Gratitude",
+            "color": "success",
+            "quick_relief": [
+                "📝 **Three good things:** Write down three things that went well today. Any size.",
+                "💌 **Gratitude note:** Text or write a short note to someone. 'I'm grateful for you because...'",
+                "🧠 **Notice:** What are you grateful for RIGHT NOW? This device? Warmth? Breath?"
+            ],
+            "mental_shifts": [
+                "🔄 **'I get to' not 'I have to'** - Reframe one obligation as a privilege.",
+                "🔍 **Find the small:** Not just big things. The way light hits the wall. The first sip. Comfortable shoes.",
+                "🌱 **Gratitude grows:** The more you look for it, the more you find."
+            ],
+            "physical": [
+                "🫀 **Heart focus:** Hand on heart. Breathe gratitude into your chest.",
+                "😊 **Grateful smile:** Smile as you think of one thing you're thankful for.",
+                "🌞 **Look up:** Literally look up. It shifts your nervous system toward openness."
+            ],
+            "quote": "Gratitude turns what we have into enough.",
+            "affirmation": "I have so much to be grateful for. I choose to notice it."
+        },
+        
+        "Hopeful": {
+            "title": "✨ Nurture Hope",
+            "color": "success",
+            "quick_relief": [
+                "🔮 **Future visualization:** Imagine one good thing, even small, that might happen tomorrow.",
+                "📝 **Possibility list:** Write down 3 things you're looking forward to. Any size.",
+                "🌅 **Sunrise/sunset:** Look at the sky. Hope is natural. The sun always rises."
+            ],
+            "mental_shifts": [
+                "💭 **Hope is a practice.** Not naive optimism. Just the belief that good things are possible.",
+                "🛤️ **Small steps:** What's one tiny step toward something you hope for?",
+                "🤝 **Share it:** Tell someone about something you're hopeful about. Hope grows when shared."
+            ],
+            "physical": [
+                "🌞 **Light:** Get sunlight on your skin, especially morning light. Signals hope biologically.",
+                "🫁 **Open breath:** Breathe into your upper chest. Open, expansive posture.",
+                "👣 **Forward movement:** Walk forward, even a few steps. Literally moving forward."
+            ],
+            "quote": "Hope is not the conviction that something will turn out well, but the certainty that something makes sense regardless of how it turns out.",
+            "affirmation": "I believe good things are possible. I am open to hope."
+        },
+        
+        # ----------------------------------------
+        # NEUTRAL
+        # ----------------------------------------
+        "Okay": {
+            "title": "🌱 Gentle Check-In",
+            "color": "info",
+            "quick_relief": [
+                "💭 **'Okay is okay.'** You don't need to feel great to have a good day.",
+                "📝 **Small win:** What's one thing that went okay today? Acknowledge it.",
+                "🧘 **Presence:** You're here. You're reading this. That's enough."
+            ],
+            "mental_shifts": [
+                "📊 **'Okay' is stable.** Not every day needs to be amazing. Stability is valuable.",
+                "🎯 **One thing:** What's one small thing you want to do today? Just one.",
+                "🌿 **Contentment practice:** Can you be content with 'okay' right now?"
+            ],
+            "physical": [
+                "🫁 **Neutral breath:** No special pattern. Just notice your breath without changing it.",
+                "🧣 **Comfort check:** Adjust something for comfort. Temperature? Position? Clothing?",
+                "👁️ **Soft gaze:** Look at something neutral. A wall. The sky. Rest your eyes."
+            ],
+            "quote": "You don't have to feel amazing every day. 'Okay' is enough.",
+            "affirmation": "I am okay. That is enough for today."
+        },
+        
+        "Neutral": {
+            "title": "🌱 Gentle Presence",
+            "color": "info",
+            "quick_relief": [
+                "🧘 **Just notice:** Don't try to change your mood. Just notice it without judgment.",
+                "📝 **Check-in:** 'I feel neutral. That's fine. It will shift naturally.'",
+                "🎯 **One small action:** What's one tiny thing you want to do? Do it."
+            ],
+            "mental_shifts": [
+                "📊 **Neutral is not bad.** It's not negative. It's just... neutral. That's allowed.",
+                "🌊 **Moods shift.** This won't last forever. Neither will the hard days. Neither will the good ones.",
+                "💭 **Curiosity:** 'I wonder what I'll feel later?' No pressure, just curiosity."
+            ],
+            "physical": [
+                "🫁 **Three breaths:** Three intentional breaths. No count, no pattern. Just breath.",
+                "🧣 **Comfort:** Adjust something small. Socks? Lighting? Posture?",
+                "👣 **Ground:** Feel your feet on the floor. You are here."
+            ],
+            "quote": "Still water runs deep. You don't have to be in motion to have depth.",
+            "affirmation": "I am present. That is enough."
+        }
+    }
+    
+    # Return suggestions for the emotion, or a default
+    return suggestions.get(emotion, {
+        "title": "🌱 Check-In",
+        "color": "info",
+        "quick_relief": [
+            "💭 **What do I need right now?** Rest? Connection? Movement? Silence?",
+            "🎯 **What's one tiny step I can take?**",
+            "🤔 **If I felt better, what would be different?**"
+        ],
+        "mental_shifts": [
+            "📝 **Name the emotion:** What am I actually feeling?",
+            "🌊 **This too shall pass.** All feelings are temporary.",
+            "💬 **Talk to yourself like a friend.** What would you say?"
+        ],
+        "physical": [
+            "🫁 **Three deep breaths.** In through nose, out through mouth.",
+            "💧 **Drink water.** Your brain needs it.",
+            "🧣 **Adjust for comfort.** Temperature, position, lighting."
+        ],
+        "quote": "Small steps are still progress.",
+        "affirmation": "I am doing the best I can. That is enough."
+    })
+
 # ---------- SIDEBAR - BLACK MAC-FRIENDLY NAVIGATION ----------
 st.sidebar.markdown("""
 <style>
@@ -338,6 +804,15 @@ st.sidebar.markdown("""
     .stButton button[kind="primary"]:hover {
         background-color: #0A5C1F !important;
         color: white !important;
+    }
+    
+    /* Self-care section styling */
+    .self-care-card {
+        background: #f9f9fc;
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 16px;
+        border-left: 5px solid;
     }
     
     /* Hide Streamlit branding */
@@ -478,117 +953,58 @@ if page == "📝 Journal":
                 save_entry(emotion, journal_entry, source="ai")
                 st.success("✅ Journal saved and analyzed!")
                 
-                # ---------- BETTER SELF-CARE SUGGESTIONS ----------
+                # ---------- MASSIVELY IMPROVED SELF-CARE SUGGESTIONS ----------
                 st.divider()
-                st.subheader("💚 Personalized Self-Care")
                 
-                # Create expandable sections for each emotion type
-                if emotion in ["Happy", "Excited", "Calm", "Grateful", "Hopeful"]:
-                    with st.expander("🌿 Savor This Moment", expanded=True):
-                        st.markdown("""
-                        **You're in a positive space right now. Here's how to nurture it:**
-                        
-                        ✨ **Gratitude pause** - What's one thing you're thankful for right now?
-                        📝 **Capture this feeling** - Write down what's going well
-                        🌅 **Savor** - Take 30 seconds to really feel this moment
-                        🎵 **Celebrate** - Listen to a song that matches your mood
-                        
-                        > *"Happiness is not something you postpone for the future; it is something you design for the present."*
-                        """)
+                # Get personalized suggestions
+                care = get_self_care_suggestions(emotion)
                 
-                elif emotion in ["Anxious", "Stressed", "Overwhelmed", "Scared", "Worried"]:
-                    with st.expander("🌀 Calm Your Mind", expanded=True):
-                        st.markdown("""
-                        **Your nervous system needs soothing right now. Try these:**
-                        
-                        🌬️ **4-7-8 Breathing** - Inhale 4, Hold 7, Exhale 8 (repeat 4x)
-                        🖐️ **Palm pressure** - Press your thumb into your opposite palm
-                        ❄️ **Cold splash** - Run cold water over your wrists
-                        🌳 **5-4-3-2-1** - Name 5 things you see, 4 you feel, 3 you hear...
-                        ☕ **Warm drink** - Hold something warm and focus on the sensation
-                        
-                        > *"This feeling is temporary. You've survived 100% of your bad days."*
-                        """)
-                
-                elif emotion in ["Sad", "Lonely", "Empty"]:
-                    with st.expander("💙 Gentle Comfort", expanded=True):
-                        st.markdown("""
-                        **Be kind to yourself right now. Here's what helps:**
-                        
-                        🤗 **Self-compassion break** - Place hand on heart: "This is hard. I'm not alone."
-                        📞 **Reach out** - Text or call one person you trust
-                        🧣 **Cozy moment** - Wrap yourself in something soft, make tea
-                        🎧 **Comfort media** - Put on a familiar show or song that feels safe
-                        🌙 **Permission to rest** - You don't have to be productive today
-                        
-                        > *"You are allowed to feel sad. You are still worthy of love and connection."*
-                        """)
-                
-                elif emotion in ["Angry", "Frustrated"]:
-                    with st.expander("🔥 Release Tension", expanded=True):
-                        st.markdown("""
-                        **Your anger is valid. Here's how to channel it:**
-                        
-                        🏃 **Physical release** - 1 minute of jumping jacks or shaking your body
-                        ✍️ **Write it out** - Type everything you're angry about, then delete it
-                        🧊 **Cool down** - Hold an ice cube or splash cold water on your face
-                        🗣️ **Name it** - Say out loud: "I am angry because..." 
-                        🚶 **Change scenery** - Step outside for 2 minutes
-                        
-                        > *"Anger is a messenger. Listen to what it's telling you, then release it."*
-                        """)
-                
-                elif emotion in ["Tired"]:
-                    with st.expander("😴 Rest & Recharge", expanded=True):
-                        st.markdown("""
-                        **You're running on empty. Here's how to refill:**
-                        
-                        ⏸️ **Guilt-free pause** - Rest is productive. Do nothing for 5 minutes.
-                        💤 **Power nap** - 20 minutes max, set an alarm
-                        🧘 **Body scan** - Close your eyes, notice tension, breathe into it
-                        🍵 **Hydrate** - Drink a full glass of water
-                        🌿 **Low stimulation** - Dim lights, silence notifications
-                        
-                        > *"You are not a machine. Rest is not a reward for exhaustion—it's a necessity."*
-                        """)
-                
-                elif emotion in ["Guilty", "Ashamed"]:
-                    with st.expander("🕊️ Self-Forgiveness", expanded=True):
-                        st.markdown("""
-                        **You deserve compassion. Try this:**
-                        
-                        💬 **Talk to yourself like a friend** - What would you say to someone you love?
-                        📝 **Write a forgiveness letter** - To yourself, you don't have to send it
-                        🌅 **Fresh start** - Tomorrow is new. This moment is new.
-                        🤝 **Connect** - Shame thrives in secrecy. Share with someone safe.
-                        
-                        > *"You are human. You are learning. You are enough."*
-                        """)
-                
-                elif emotion in ["Okay", "Neutral"]:
-                    with st.expander("🌱 Gentle Check-In", expanded=True):
-                        st.markdown("""
-                        **You're feeling okay. That's perfectly fine. Here's a gentle check-in:**
-                        
-                        💭 **What do you need right now?** (Rest? Connection? Movement? Silence?)
-                        🎯 **What's one tiny step you can take?**
-                        🌟 **What's one small thing that went well today?**
-                        📖 **Read this:** "You don't have to feel amazing every day. 'Okay' is enough."
-                        
-                        > *"Peace is not the absence of chaos, but the presence of calm in the midst of it."*
-                        """)
-                
+                # Display header with emotion-specific color
+                if care["color"] == "success":
+                    st.success(f"💚 **{care['title']}**")
+                elif care["color"] == "warning":
+                    st.warning(f"💛 **{care['title']}**")
+                elif care["color"] == "error":
+                    st.error(f"❤️ **{care['title']}**")
                 else:
-                    with st.expander("🌱 Check-In", expanded=True):
-                        st.markdown("""
-                        **Take a moment with yourself:**
-                        
-                        💭 **What do I need right now?** (Rest? Connection? Movement? Silence?)
-                        🎯 **What's one tiny step I can take?**
-                        🤔 **If I felt better, what would be different?**
-                        
-                        > *"Small steps are still progress."*
-                        """)
+                    st.info(f"💙 **{care['title']}**")
+                
+                # Create three columns for different types of help
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.markdown("#### ⚡ Quick Relief")
+                    for item in care["quick_relief"][:3]:  # Show first 3
+                        st.markdown(item)
+                
+                with col2:
+                    st.markdown("#### 🧠 Mind Shift")
+                    for item in care["mental_shifts"][:2]:  # Show first 2
+                        st.markdown(item)
+                
+                with col3:
+                    st.markdown("#### 🫂 Body")
+                    for item in care["physical"][:2]:  # Show first 2
+                        st.markdown(item)
+                
+                # Quote and affirmation
+                st.divider()
+                st.markdown(f"> *{care['quote']}*")
+                st.markdown(f"**✨ Today's affirmation:** {care['affirmation']}")
+                
+                # If you want to see ALL suggestions, expander
+                with st.expander("📚 See all suggestions for this emotion"):
+                    st.markdown("#### ⚡ Quick Relief")
+                    for item in care["quick_relief"]:
+                        st.markdown(item)
+                    
+                    st.markdown("#### 🧠 Mind Shift")
+                    for item in care["mental_shifts"]:
+                        st.markdown(item)
+                    
+                    st.markdown("#### 🫂 Body")
+                    for item in care["physical"]:
+                        st.markdown(item)
     
     # Show recent entries at the bottom (collapsible)
     st.divider()
