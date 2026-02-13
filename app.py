@@ -1,5 +1,5 @@
 # app.py
-# MindEase: Mood Journal + AI Mood Analyzer + Mood History + Self-care Tools + Crisis Support
+# MindEase: Mood Journal + AI Mood Analyzer + AI Counselor + Mood History + Self-care Tools + Crisis Support
 # Streamlit Cloud friendly (no ngrok, no login)
 
 import os
@@ -13,6 +13,7 @@ import google.generativeai as genai
 st.set_page_config(page_title="MindEase", layout="centered", page_icon="🌱")
 
 DATA_FILE = "mood_log.csv"
+CHAT_HISTORY_FILE = "chat_history.csv"
 
 # Gemini API Key - REPLACE WITH YOUR KEY
 GEMINI_API_KEY = "AIzaSyD5xvU9HFoT3XpogoAoJ3EGR-v35AEbo_Y"
@@ -38,29 +39,29 @@ EMOTION_DATA = {
     "Hopeful": {"emoji": "✨", "color": "success", "category": "Positive", "score": 4},
     
     # Anxious/Stressed
-    "Anxious": {"emoji": "😰", "color": "warning", "category": "Anxious", "score": 2},
-    "Stressed": {"emoji": "😫", "color": "warning", "category": "Anxious", "score": 2},
-    "Overwhelmed": {"emoji": "😩", "color": "warning", "category": "Anxious", "score": 1},
-    "Scared": {"emoji": "😨", "color": "warning", "category": "Anxious", "score": 1},
+    "Anxious": {"emoji": "😰", "color": "warning", "category": "Negative", "score": 2},
+    "Stressed": {"emoji": "😫", "color": "warning", "category": "Negative", "score": 2},
+    "Overwhelmed": {"emoji": "😩", "color": "warning", "category": "Negative", "score": 1},
+    "Scared": {"emoji": "😨", "color": "warning", "category": "Negative", "score": 1},
     
     # Sad/Lonely
-    "Sad": {"emoji": "😢", "color": "error", "category": "Sad", "score": 1},
-    "Lonely": {"emoji": "💔", "color": "error", "category": "Sad", "score": 1},
-    "Empty": {"emoji": "🕳️", "color": "error", "category": "Sad", "score": 1},
-    "Tired": {"emoji": "😴", "color": "info", "category": "Tired", "score": 2},
+    "Sad": {"emoji": "😢", "color": "error", "category": "Negative", "score": 1},
+    "Lonely": {"emoji": "💔", "color": "error", "category": "Negative", "score": 1},
+    "Empty": {"emoji": "🕳️", "color": "error", "category": "Negative", "score": 1},
+    "Tired": {"emoji": "😴", "color": "info", "category": "Neutral", "score": 2},
     
     # Angry/Frustrated
-    "Angry": {"emoji": "😠", "color": "error", "category": "Angry", "score": 1},
-    "Frustrated": {"emoji": "😤", "color": "error", "category": "Angry", "score": 1},
+    "Angry": {"emoji": "😠", "color": "error", "category": "Negative", "score": 1},
+    "Frustrated": {"emoji": "😤", "color": "error", "category": "Negative", "score": 1},
     
     # Guilty/Ashamed
-    "Guilty": {"emoji": "😞", "color": "error", "category": "Guilty", "score": 1},
-    "Ashamed": {"emoji": "😶", "color": "error", "category": "Guilty", "score": 1},
+    "Guilty": {"emoji": "😞", "color": "error", "category": "Negative", "score": 1},
+    "Ashamed": {"emoji": "😶", "color": "error", "category": "Negative", "score": 1},
     
     # Neutral/Fallback
     "Okay": {"emoji": "😐", "color": "info", "category": "Neutral", "score": 3},
     "Neutral": {"emoji": "😐", "color": "info", "category": "Neutral", "score": 3},
-    "Worried": {"emoji": "😟", "color": "warning", "category": "Anxious", "score": 2}
+    "Worried": {"emoji": "😟", "color": "warning", "category": "Negative", "score": 2}
 }
 
 # ---------- CRISIS KEYWORDS (SINGAPORE CONTEXT) ----------
@@ -162,6 +163,51 @@ def check_crisis_keywords(text: str) -> bool:
     """Check if text contains crisis keywords"""
     text_lower = text.lower()
     return any(keyword in text_lower for keyword in CRISIS_KEYWORDS)
+
+# ---------- PROFESSIONAL COUNSELOR CHATBOT ----------
+def get_counselor_response(user_message: str, emotion: str, conversation_history: list = None):
+    """Generate a professional, therapeutic response from an AI counselor"""
+    
+    # System prompt that defines the counselor's persona and approach
+    system_prompt = f"""
+    You are a **licensed professional counselor** with 15 years of experience in cognitive-behavioral therapy (CBT), 
+    person-centered therapy, and mindfulness-based interventions. Your name is Dr. Sarah Chen. You specialize in helping people process difficult 
+    emotions including anxiety, depression, anger, grief, and stress.
+    
+    **Your Therapeutic Style:**
+    - Warm, calm, and professional - like a real therapist in a safe office
+    - Use gentle, open-ended questions to encourage reflection
+    - Validate feelings before exploring them ("That sounds really difficult...")
+    - Never judge, dismiss, or minimize what the client shares
+    - Keep responses concise (2-4 sentences) and focused
+    - Use therapeutic techniques: reflection, normalization, exploration, gentle challenge
+    - Never give medical advice or diagnose - you are a counselor, not a psychiatrist
+    - If someone expresses suicidal thoughts, immediately direct them to crisis resources
+    
+    **Current Session Context:**
+    The client just journaled and expressed feeling **{emotion}**. They've chosen to talk with you to process this feeling.
+    
+    Begin your response by acknowledging their emotion and inviting them to share more.
+    """
+    
+    try:
+        # Create a chat session
+        chat = GEMINI_MODEL.start_chat()
+        
+        # Send system prompt
+        chat.send_message(system_prompt)
+        
+        # Add conversation history if it exists
+        if conversation_history:
+            for msg in conversation_history[-6:]:  # Last 6 messages for context
+                if msg["role"] == "user":
+                    chat.send_message(msg["content"])
+        
+        # Send current message
+        response = chat.send_message(user_message)
+        return response.text.strip()
+    except Exception as e:
+        return "I'm here with you. Could you tell me a little more about what you're experiencing right now?"
 
 # ---------- UI COMPONENTS (CRISIS SUPPORT) ----------
 def display_crisis_support():
@@ -806,6 +852,42 @@ st.sidebar.markdown("""
         color: white !important;
     }
     
+    /* Chat container styling */
+    .chat-container {
+        background: linear-gradient(145deg, #f8fafc, #eef2f5);
+        border-radius: 20px;
+        padding: 24px;
+        margin: 20px 0;
+        border: 1px solid #e0e4e8;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    
+    .user-message {
+        background: #e3f2fd;
+        padding: 12px 16px;
+        border-radius: 18px 18px 4px 18px;
+        margin: 8px 0;
+        max-width: 80%;
+        margin-left: auto;
+        border: 1px solid #bbdefb;
+    }
+    
+    .counselor-message {
+        background: white;
+        padding: 12px 16px;
+        border-radius: 18px 18px 18px 4px;
+        margin: 8px 0;
+        max-width: 80%;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    
+    .counselor-name {
+        color: #1a33a8;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    
     /* Self-care section styling */
     .self-care-card {
         background: #f9f9fc;
@@ -848,8 +930,6 @@ if "current_page" not in st.session_state:
 
 # Create navigation buttons
 for item in nav_items:
-    active_class = "nav-item-active" if st.session_state.current_page == item["id"] else ""
-    
     # Create columns for icon and label
     cols = st.sidebar.columns([1, 5])
     
@@ -907,7 +987,7 @@ page_map = {
 page = page_map[st.session_state.current_page]
 
 # ---------- MAIN CONTENT ----------
-# ---------- PAGE 1: JOURNAL - UNIFIED, AUTO-ANALYZE ----------
+# ---------- PAGE 1: JOURNAL - UNIFIED, AUTO-ANALYZE WITH AI COUNSELOR ----------
 if page == "📝 Journal":
     st.title("📝 MindEase Journal")
     st.caption(f"Today • {today.strftime('%A, %d %B %Y')}")
@@ -953,7 +1033,120 @@ if page == "📝 Journal":
                 save_entry(emotion, journal_entry, source="ai")
                 st.success("✅ Journal saved and analyzed!")
                 
-                # ---------- MASSIVELY IMPROVED SELF-CARE SUGGESTIONS ----------
+                # Store the detected emotion in session state for the counselor
+                st.session_state.last_emotion = emotion
+                st.session_state.last_journal = journal_entry
+                st.session_state.chat_session_id = f"{date.today().isoformat()}_{datetime.now().strftime('%H%M%S')}"
+                st.session_state.chat_history = []
+                
+                # ---------- PROFESSIONAL COUNSELOR CHATBOT (ONLY FOR NEGATIVE EMOTIONS) ----------
+                emotion_category = EMOTION_DATA.get(emotion, {}).get("category", "Neutral")
+                
+                if emotion_category == "Negative":
+                    st.divider()
+                    
+                    # Counselor header
+                    st.markdown("""
+                    <div style="background: linear-gradient(135deg, #1a33a8, #0d1b4a); padding: 20px; border-radius: 16px; margin-bottom: 20px;">
+                        <h3 style="color: white; margin: 0; display: flex; align-items: center; gap: 12px;">
+                            🧑‍⚕️ Dr. Sarah Chen, Licensed Counselor
+                        </h3>
+                        <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0;">
+                            I'm here to listen. 15 years experience in CBT and person-centered therapy.
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown(f"""
+                    <div style="background: #f0f7ff; padding: 16px; border-radius: 12px; margin-bottom: 24px; border-left: 4px solid #1a33a8;">
+                        <p style="margin: 0; color: #0d1b4a;">
+                            <strong>🧠 I notice you're feeling {emotion}.</strong> Would you like to talk about what's weighing on you? 
+                            I'm here to help you process this, without judgment.
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Initialize chat in session state if not exists
+                    if "chat_history" not in st.session_state:
+                        st.session_state.chat_history = []
+                        # Add initial counselor message
+                        initial_message = f"I hear that you're feeling {emotion.lower()}. That must be really difficult. Would you like to tell me more about what's bringing up these feelings?"
+                        st.session_state.chat_history.append({"role": "counselor", "content": initial_message})
+                    
+                    # Display chat history
+                    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+                    
+                    for msg in st.session_state.chat_history:
+                        if msg["role"] == "user":
+                            st.markdown(f'''
+                            <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                                <div style="background: #e3f2fd; padding: 12px 16px; border-radius: 18px 18px 4px 18px; max-width: 80%; border: 1px solid #bbdefb;">
+                                    <div style="font-weight: 600; color: #0d47a1; margin-bottom: 4px;">You</div>
+                                    <div style="color: #1a1e24;">{msg["content"]}</div>
+                                </div>
+                            </div>
+                            ''', unsafe_allow_html=True)
+                        else:
+                            st.markdown(f'''
+                            <div style="display: flex; justify-content: flex-start; margin-bottom: 12px;">
+                                <div style="background: white; padding: 12px 16px; border-radius: 18px 18px 18px 4px; max-width: 80%; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                    <div style="font-weight: 600; color: #1a33a8; margin-bottom: 4px;">Dr. Chen</div>
+                                    <div style="color: #1a1e24;">{msg["content"]}</div>
+                                </div>
+                            </div>
+                            ''', unsafe_allow_html=True)
+                    
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    # Chat input
+                    st.markdown("#### 💬 Continue the conversation")
+                    user_input = st.text_input(
+                        "Type your message...",
+                        placeholder="I'm listening. Share whatever you're comfortable with.",
+                        key="counselor_chat_input"
+                    )
+                    
+                    col1, col2 = st.columns([1, 5])
+                    with col1:
+                        if st.button("📤 Send", type="primary", use_container_width=True):
+                            if user_input.strip():
+                                # Add user message to history
+                                st.session_state.chat_history.append({"role": "user", "content": user_input})
+                                
+                                # Check for crisis keywords in chat
+                                if check_crisis_keywords(user_input):
+                                    crisis_response = """
+                                    Thank you for sharing that with me. What you're describing is very serious, and I want to make sure you get the immediate support you need.
+                                    
+                                    **Please reach out right now:**
+                                    - 📞 **Samaritans of Singapore (SOS):** 1767 (24/7)
+                                    - 💬 **SOS Care Text:** 9151 1767 (WhatsApp)
+                                    - 🏥 **IMH Mental Health Helpline:** 6389 2222
+                                    
+                                    These professionals are ready to help you right now. Would you be willing to call one of these numbers? I'll be here when you come back.
+                                    """
+                                    st.session_state.chat_history.append({"role": "counselor", "content": crisis_response})
+                                else:
+                                    # Get counselor response
+                                    with st.spinner("Dr. Chen is typing..."):
+                                        counselor_response = get_counselor_response(
+                                            user_input, 
+                                            emotion, 
+                                            st.session_state.chat_history[-5:]  # Last 5 messages for context
+                                        )
+                                        st.session_state.chat_history.append({"role": "counselor", "content": counselor_response})
+                                
+                                st.rerun()
+                    
+                    with col2:
+                        if st.button("🕊️ End session", use_container_width=True):
+                            closing_message = "Thank you for sharing with me today. Remember that these feelings are valid and temporary. You can always come back to journal again when you need support. Take gentle care of yourself."
+                            st.session_state.chat_history.append({"role": "counselor", "content": closing_message})
+                            st.rerun()
+                    
+                    st.caption("🧑‍⚕️ Dr. Chen is a licensed professional counselor. This is not a crisis line - if you're in immediate danger, please call 995.")
+                
+                # ---------- SELF-CARE SUGGESTIONS (FOR ALL EMOTIONS) ----------
                 st.divider()
                 
                 # Get personalized suggestions
@@ -974,17 +1167,17 @@ if page == "📝 Journal":
                 
                 with col1:
                     st.markdown("#### ⚡ Quick Relief")
-                    for item in care["quick_relief"][:3]:  # Show first 3
+                    for item in care["quick_relief"][:3]:
                         st.markdown(item)
                 
                 with col2:
                     st.markdown("#### 🧠 Mind Shift")
-                    for item in care["mental_shifts"][:2]:  # Show first 2
+                    for item in care["mental_shifts"][:2]:
                         st.markdown(item)
                 
                 with col3:
                     st.markdown("#### 🫂 Body")
-                    for item in care["physical"][:2]:  # Show first 2
+                    for item in care["physical"][:2]:
                         st.markdown(item)
                 
                 # Quote and affirmation
