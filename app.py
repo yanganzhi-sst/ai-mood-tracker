@@ -14,12 +14,11 @@ st.set_page_config(page_title="MindEase", layout="centered", page_icon="🌱")
 
 DATA_FILE = "mood_log.csv"
 
-# Gemini API Key - REPLACE WITH YOUR KEY
+# Gemini API Key
 GEMINI_API_KEY = "AIzaSyD5xvU9HFoT3XpogoAoJ3EGR-v35AEbo_Y"
 genai.configure(api_key=GEMINI_API_KEY)
 GEMINI_MODEL = genai.GenerativeModel("gemini-2.5-flash")
 
-# Mood options for manual logging
 MOODS = [
     "Happy", "Calm", "Okay", "Worried", "Anxious", "Stressed",
     "Sad", "Angry", "Frustrated", "Tired"
