@@ -73,7 +73,7 @@ EMOTION_DATA = {
     "Worried": {"emoji": "😟", "color": "warning", "category": "Negative", "score": 2}
 }
 
-# ---------- CRISIS KEYWORDS (SINGAPORE CONTEXT) ----------
+# ---------- CRISIS KEYWORDS  ----------
 CRISIS_KEYWORDS = [
     # Self-harm methods
     "kill myself", "suicide", "want to die", "end my life", 
@@ -91,7 +91,7 @@ CRISIS_KEYWORDS = [
     "can't go on", "give up", "better off dead"
 ]
 
-# ---------- HELPER FUNCTIONS (DATA MANAGEMENT) ----------
+# ---------- HELPER FUNCTIONS ----------
 def load_log() -> pd.DataFrame:
     """Load mood journal from CSV"""
     if os.path.exists(DATA_FILE):
