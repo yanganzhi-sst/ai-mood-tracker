@@ -1,5 +1,19 @@
-Page 1 :
-Page 2 :
+Page 1 : Journal Tab
+1. Navigate to the Journal tab from the sidebar.
+2. Type your thoughts and feelings into the journal text box.
+3. Select your mood.
+4. Click the Save Entry button.
+5. A success message will appear once the entry has been saved.
+
+Page 2 : History Tab
+1. Navigate to the History tab from the sidebar.
+2. All saved journal entries will be shown in order of submission.
+3. Each journal entry includes:
+- Date and time
+- Mood 
+- Journal content
+
+
 Page 3: 
 
 
