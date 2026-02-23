@@ -1,6 +1,5 @@
 # app.py
 # MindEase: Mood Journal + AI Mood Analyzer + Mood History + Self-care Tools + Crisis Support
-# Streamlit Cloud friendly (no ngrok, no login)
 
 import os
 from datetime import datetime, date
