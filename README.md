@@ -13,7 +13,7 @@ Save Button – Click "💾 Save & Analyze Entry" to process
 
 After Analysis – Results
 
-Emotion Display – Your emotion with emoji (😊, 😰, 😢, etc.)
+Emotion Display – Your emotion with emoji (😊, 😰, 😢)
 
 AI Explanation – One sentence about why you might feel this way
 
@@ -23,7 +23,7 @@ Daily Affirmation – Positive thought for your day
 
 Recent Entries
 
-Emoji + Mood – 😊 Happy, 😰 Anxious, etc.
+Emoji + Mood – 😊 Happy, 😰 Anxious
 Date – When you wrote it
 Preview – First 100 characters of your entry
 Source Icon – 🤖 (AI) or 🚨 (Crisis)
@@ -48,7 +48,7 @@ Charts
 Mood Line Chart – Your mood trend over time
 Emotion Bar Chart – How often each emotion appears
 Recent Entries List
-Emoji – 😊, 😰, 😢, etc. for each emotion
+Emoji – 😊, 😰, 😢 for each emotion
 Mood – Name of the emotion
 Date – When you wrote it
 Preview – First part of your journal entry
@@ -60,23 +60,23 @@ Clear All Data – Deletes ALL journal entries (asks for confirmation)
 
 **Page 3: Self-Care**
 
-🧰 SELF-CARE TOOLBOX – Feel Better Now
+SELF-CARE TOOLBOX – Feel Better Now
 
-🌬️ Breathing Tab
+Breathing Tab
 Box breathing – Inhale 4, hold 4, exhale 4, hold 4
 Slider – Choose how many cycles (2-8)
 Progress bar – Shows your breathing exercise progress
 Done message – Tells you when it's complete
 
-👁️ Grounding Tab
+Grounding Tab
 5-4-3-2-1 exercise – Name 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste
 Text boxes – Type what you notice
 
-💬 Affirmations Tab
+Affirmations Tab
 Click for encouragement – Get a random positive message
 7 uplifting statements – Different message each time
 
-📝 Prompts Tab
+Prompts Tab
 6 journal questions – Ideas when you don't know what to write
 
 
