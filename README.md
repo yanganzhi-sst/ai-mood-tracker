@@ -1,20 +1,61 @@
-Page 1 : Journal Tab
-1. Navigate to the Journal tab from the sidebar.
-2. Type your thoughts and feelings into the journal text box.
-3. Select your mood.
-4. Click the Save Entry button.
-5. A success message will appear once the entry has been saved.
+**Page 1: Journal Page**
 
-Page 2 : History Tab
-1. Navigate to the History tab from the sidebar.
-2. All saved journal entries will be shown in order of submission.
-3. Each journal entry includes:
-- Date and time
-- Mood 
-- Journal content
+Your Journal Entry
+
+Text Box – Type anything about your day or feelings
+
+Word Counter – Shows words and characters as you type
+
+Save Button – Click "💾 Save & Analyze Entry" to process
+
+After Analysis – Results
+
+Emotion Display – Your emotion with emoji (😊, 😰, 😢, etc.)
+
+AI Explanation – One sentence about why you might feel this way
+
+Daily Affirmation – Positive thought for your day
+
+"See All" Link – Click for even more self-care ideas
+
+Recent Entries
+
+Emoji + Mood – 😊 Happy, 😰 Anxious, etc.
+Date – When you wrote it
+Preview – First 100 characters of your entry
+Source Icon – 🤖 (AI) or 🚨 (Crisis)
 
 
-Page 3: Self-Care
+**Page 2: History Page**
+
+
+Statistics Dashboard
+
+Total Entries – Number of journal entries
+Average Mood – Score out of 5 (1=low, 5=high)
+Most Frequent – Your most common emotion
+Today's Count – Entries from current day
+
+Filters
+
+Date Range – All time, Last 7 days, Last 30 days, This month
+Entry Type – All entries, Journal only
+
+Charts
+Mood Line Chart – Your mood trend over time
+Emotion Bar Chart – How often each emotion appears
+Recent Entries List
+Emoji – 😊, 😰, 😢, etc. for each emotion
+Mood – Name of the emotion
+Date – When you wrote it
+Preview – First part of your journal entry
+Source – 🤖 (AI analyzed) or 🚨 (Crisis alert)
+
+Data Management
+Clear All Data – Deletes ALL journal entries (asks for confirmation)
+
+
+**Page 3: Self-Care**
 
 🧰 SELF-CARE TOOLBOX – Feel Better Now
 
@@ -34,10 +75,6 @@ Click for encouragement – Get a random positive message
 
 📝 Prompts Tab
 6 journal questions – Ideas when you don't know what to write
-
-
-
-
 
 
 **Page 4 : Crisis Help**
