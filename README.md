@@ -14,7 +14,7 @@ Page 2 : History Tab
 - Journal content
 
 
-Page 3: 
+Page 3: Self-Care
 
 🧰 SELF-CARE TOOLBOX – Feel Better Now
 
