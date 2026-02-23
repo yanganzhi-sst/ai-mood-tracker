@@ -1,5 +1,5 @@
 Link to add: https://ai-mood-tracker-computing.streamlit.app/
-
+Note: The AI is free version. So please wait a while before using it again if error message says  AI analysis is unavailable.
 **Page 1: Journal Page**
 
 Your Journal Entry
