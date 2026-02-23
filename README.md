@@ -16,6 +16,26 @@ Page 2 : History Tab
 
 Page 3: 
 
+🧰 SELF-CARE TOOLBOX – Feel Better Now
+
+🌬️ Breathing Tab
+Box breathing – Inhale 4, hold 4, exhale 4, hold 4
+Slider – Choose how many cycles (2-8)
+Progress bar – Shows your breathing exercise progress
+Done message – Tells you when it's complete
+
+👁️ Grounding Tab
+5-4-3-2-1 exercise – Name 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste
+Text boxes – Type what you notice
+
+💬 Affirmations Tab
+Click for encouragement – Get a random positive message
+7 uplifting statements – Different message each time
+
+📝 Prompts Tab
+6 journal questions – Ideas when you don't know what to write
+
+
 
 
 
